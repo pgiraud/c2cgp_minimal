@@ -1,0 +1,2276 @@
+This file includes migration steps for each release of c2cgeoportal.
+
+
+Version 1.4
+===========
+
+1. Tileforge has been removed from c2cgeoportal and replaced by a combination
+   of TileCloud and MapCache.
+
+   The main documentation is available at:
+   http://docs.camptocamp.net/c2cgeoportal/integrator/tilegeneration.html.
+
+   The first things you should do are::
+   * In `c2cgp_minimal/templates/viewer.js`, `c2cgp_minimal/templates/api/mapconfig.js`,
+     `c2cgp_minimal/templates/edit.js` replace
+     `url: '${tilecache_url}',` by `url: ${tiles_url},` (no quotes).
+   * In the `config.yaml.in` transform tilecache_url in an array,
+     and name it `tiles_url`.
+   * Remove `apache/tilecache.conf.in`.
+   * Remove the parameter `tilecache.cfg` in the `production.ini.in` and
+     in the `devlopment.ini.in`.
+   * In the `buildout.cfg` section `[buildout]` remove the line:
+     find-links += http://pypi.camptocamp.net/internal-pypi/index/tileforge
+   * In the file `<package>/__init__.py` remove the following code::
+
+        from c2cgeoportal.views.tilecache import load_tilecache_config
+
+        # add a TileCache view
+        load_tilecache_config(config.get_settings())
+        config.add_route('tilecache', '/tilecache{path:.*?}')
+        config.add_view(
+            view='c2cgeoportal.views.tilecache:tilecache',
+            route_name='tilecache')
+
+   * When the new configuration is done you can remove the ``tilecache``
+     folder.
+
+2. Add sub domain support for pyramid views.
+   You can add the following configuration to the `config.yaml.in`:
+
+   # The URL template used to generate the sub domain URL
+   # %(sub)s will be replaced by the sub domain value.
+   #subdomain_url_template: http://%(sub)s.${vars:host}
+   # The used sub domain for the static resources
+   #subdomains: [s1, s2, s3, s4]
+
+   For the documentation see:
+   http://docs.camptocamp.net/c2cgeoportal/integrator/customize_ui.html#sub-domain
+   http://docs.camptocamp.net/c2cgeoportal/integrator/tilegeneration.html#internal-service
+
+3. We don't anymore reset all default CSS attributes in the XAPI.
+   Than the XAPI should not anymore brake the CSS of the page.
+
+   For that you should:
+
+   Add in the file `c2cgp_minimal/templates/api/viewer.js`,
+   in the `portalConfig`:
+
+                ctCls: 'x-map',
+
+   In the file `c2cgp_minimal/templates/api/xapi.js`, replace:
+
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/ext-all.css')}" + '" />');
+
+   By:
+
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/core/src/theme/reset.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/editor.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/pivotgrid.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/menu.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/panel.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/grid.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/debug.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/qtips.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/dd.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/form.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/resizable.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/toolbar.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/slider.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/combo.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/layout.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/dialog.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/core.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/button.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/progress.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/tabs.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/box.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/borders.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/date-picker.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/tree.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/window.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/visual/list-view.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/editor.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/pivotgrid.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/menu.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/panel.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/grid.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/debug.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/qtips.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/dd.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/form.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/resizable.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/toolbar.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/panel-reset.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/slider.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/combo.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/layout.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/dialog.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/core.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/button.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/progress.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/tabs.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/box.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/borders.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/date-picker.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/tree.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/window.css')}" + '" />');
+document.write('<link rel="stylesheet" type="text/css" href="'
+        + "${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/resources/css/structure/list-view.css')}" + '" />');
+
+4. In this version we call mapserver and the MapFish print directly on localhost
+   with the given Host header.
+
+   In `comfig.yaml.in` set `mapserver_url` and `print_url` using localhost
+   as follows:
+
+# For mapserver proxy
+mapserv_url: http://localhost/${vars:instanceid}/mapserv
+
+# For print proxy
+print_url: http://localhost:8080/print-c2cgeoportal-${vars:instanceid}/pdf/
+
+    And in the print config template `print/templates/print.mako.in`
+    you should add the following config:
+
+localHostForward:
+    from:
+        - ${vars:host}
+    https2http: True
+
+5. Remove print config file (changed and required only for Windows):
+
+        git rm print/WEB-INF/classes/spring-application-context.xml
+
+    For Windows user redo the change done in http://docs.camptocamp.net/c2cgeoportal/integrator/create_application.html?highlight=windows#configure-the-application
+
+6. Replace the CONST_TIPS by a README:
+
+        git rm CONST_TIPS.txt.in
+        ./buildout/bin/pcreate -s c2cgeoportal_create /tmp/c2cgp_minimal package=c2cgp_minimal
+        cp /tmp/c2cgp_minimal/README.rst .
+        rm -rf /tmp/c2cgp_minimal
+        git add README.rst
+
+7. Remove all the `[versions]` section from your `buildout.cfg` file,
+   from now it's managed in the `versions.cfg` file.
+
+   Add the new `versions.cfg` file to Git:
+
+       git add versions.cfg
+
+8. Add to git the new print file name:
+
+    mv print/print-servlet-2.0-SNAPSHOT-IMG-MAGICK.war print/print-servlet-2.0-SNAPSHOT-IMG-MAGICK.war.new
+    git mv print/print-servlet-1.2-SNAPSHOT.war print/print-servlet-2.0-SNAPSHOT-IMG-MAGICK.war
+    mv print/print-servlet-2.0-SNAPSHOT-IMG-MAGICK.war.new print/print-servlet-2.0-SNAPSHOT-IMG-MAGICK.war
+    git add print/print-servlet-2.0-SNAPSHOT-IMG-MAGICK.war
+
+9. Move the `mobile_default_theme` to the functionalities int the
+   `config.yaml.in` file:
+
+     functionalities:
+        anonymous:
+    +        mobile_default_theme:
+
+    -mobile_default_theme:
+
+10. In the `jsbuild/app.cfg` use the ext debug files (3x):
+
+    -    Ext/adapter/ext/ext-base.js
+    -    Ext/ext-all.js
+    +    Ext/adapter/ext/ext-base-debug.js
+    +    Ext/ext-all-debug.js
+
+11. Password modification UI has been implemented.
+
+     It is now possible to allow the user to change his password, and optionally to remind him to change it.
+
+     a) You need to add some configuration parameters in the cgxp_login plugin:
+
+      {
+          ptype: "cgxp_login",
+          actionTarget: "center.tbar",
+          toggleGroup: "maptools",
+      % if user:
+          username: "${user.username}",
+          isPasswordChanged: ${"true" if user.is_password_changed else "false"},
+      % endif
+          loginURL: "${request.route_url('login', path='')}",
+          loginChangeURL: "${request.route_url('loginchange', path='')}",
+          logoutURL: "${request.route_url('logout', path='')}",
+          enablePasswordChange: true,
+          forcePasswordChange: true,
+          permalinkId: "permalink"
+      },
+
+     ``enablePasswordChange`` enable the password modification UI,
+     ``isPasswordChanged`` is required if you enable ``forcePasswordChange``
+     to remind the user he should change his password.
+
+     b) The form in c2cgp_minimal/templates/index.html and c2cgp_minimal/templates/edit.html must be updated:
+
+              <form method="POST" id="loginForm" style="display: none">
+                  <input id="login" name="login" type="text" autocomplete="on"/>
+                  <input id="password" name="password" type="password" autocomplete="on"/>
+     +            <input id="newPassword" name="newPassword" type="password" />
+     +            <input id="confirmNewPassword" name="confirmNewPassword" type="password" />
+              </form>
+
+     c) The database must also be upgraded to version 10.
+
+     d) You must add the following line in your production.ini.in and
+     development.ini.in in the [app:app] section:
+
+     auth_replication_enabled = ${vars:enable_auth_replication}
+     sqlalchemy_replication.url = postgresql://${dbuser_replication}:${dbpassword_replication}@${dbhost_replication}:${dbport_replication}/${db_replication}
+
+     e) Then you can enable the replication by specifying the following configuration in your buildout_<user>.cfg:
+
+     enable_auth_replication = true
+     dbhost_replication: <target database hostname>
+     dbport_replication: <target database port>
+     db_replication: <target database name>
+     dbuser_replication: <target database username>
+     dbpassword_replication: <target database password>
+
+     The target database is the database where the changes are replicated.
+
+12. In the apache/wsgi.conf.in do the following change to make the end slash optional:
+
+   -RewriteRule ^${vars:apache-entry-point}$ /${vars:instanceid}/wsgi/ [PT]
+   +RewriteRule ^${vars:apache-entry-point}?$ /${vars:instanceid}/wsgi/ [PT]
+
+13. With Mapfish-Print 2.0 some legend parameters have been added or renamed.
+    In the printing configuration, change the ``legends`` blocks as follows:
+
+   -maxIconHeight: 0
+   +iconMaxHeight: 0
+   -maxIconWidth: 0
+   +iconMaxWidth: 0
+   +horizontalAlignment: left
+
+14. In jsbuild/app.cfg add the following line to the "root" sections:
+
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/DynamicMeasure/lib
+
+15. Add routing panel files:
+
+        ./buildout/bin/pcreate -s c2cgeoportal_create /tmp/c2cgp_minimal package=c2cgp_minimal
+        cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/routing.{js,html} c2cgp_minimal/templates/
+        rm -rf /tmp/c2cgp_minimal/
+        git add c2cgp_minimal/templates/routing.{js,html}
+
+    Adding the following entries to all the ``root`` lists in
+    ``jsbuild/app.cfg`` is recommended:
+
+        c2cgp_minimal/static/lib/cgxp/openlayers.addins/AddViaPoint/lib
+
+    And add a new routing section (replace <<srid>> by the right value):
+
+        [routing.js]
+        root =
+            c2cgp_minimal/static/lib/cgxp/core/src/script
+            c2cgp_minimal/static/lib/cgxp/ext
+            c2cgp_minimal/static/lib/cgxp/geoext/lib
+            c2cgp_minimal/static/lib/cgxp/openlayers/lib
+            c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthView/lib
+            c2cgp_minimal/static/lib/cgxp/openlayers.addins/Spherical/lib
+            c2cgp_minimal/static/lib/cgxp/openlayers.addins/URLCompressed/lib
+            c2cgp_minimal/static/lib/cgxp/openlayers.addins/AddViaPoint/lib
+            c2cgp_minimal/static/lib/cgxp/gxp/src/script
+            c2cgp_minimal/static/lib/cgxp/proj4js
+            c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/Measure/lib
+            c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/SimplePrint/lib
+            c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureEditing/lib
+            c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureSelectionModel/lib
+            c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/WMSBrowser/lib
+            c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/StreetViewPanel
+            c2cgp_minimal/static/lib/cgxp/sandbox
+            c2cgp_minimal/static/lib/cgxp/styler/lib
+            c2cgp_minimal/static/lib/cgxp/ext.ux/TwinTriggerComboBox
+            c2cgp_minimal/static/lib/cgxp/ext.ux/GroupComboBox
+            c2cgp_minimal/static/lib/cgxp/ext.ux/ColorPicker
+            c2cgp_minimal/static/lib/cgxp/ext.ux/base64
+            c2cgp_minimal/static/js
+        first =
+            Ext/adapter/ext/ext-base-debug.js
+            Ext/ext-all-debug.js
+            OpenLayers/SingleFile.js
+            OpenLayers/Console.js
+            OpenLayers/BaseTypes.js
+            OpenLayers/BaseTypes/Class.js
+            OpenLayers/BaseTypes/Pixel.js
+            OpenLayers/BaseTypes/Bounds.js
+            OpenLayers/BaseTypes/LonLat.js
+            OpenLayers/BaseTypes/Element.js
+            OpenLayers/BaseTypes/Size.js
+            OpenLayers/Util.js
+            OpenLayers/Lang.js
+            proj4js/lib/proj4js.js
+            proj4js/lib/projCode/merc.js
+        exclude =
+            GeoExt.js
+            GeoExt/SingleFile.js
+        include =
+            EPSG<<srid>>.js #proj4js
+            util.js #GXP
+            widgets/Viewer.js #GXP
+            plugins/OLSource.js #GXP
+            CGXP/plugins/MapOpacitySlider.js
+            CGXP/plugins/Routing.js
+            CGXP/data/OSRM.js
+            CGXP/widgets/MapPanel.js
+            OpenLayers/Control/Navigation.js
+            OpenLayers/Control/KeyboardDefaults.js
+            OpenLayers/Control/PanZoomBar.js
+            OpenLayers/Control/ArgParser.js
+            OpenLayers/Control/Attribution.js
+            OpenLayers/Control/ScaleLine.js
+            OpenLayers/Control/MousePosition.js
+            OpenLayers/Control/OverviewMap.js
+            OpenLayers/Control/NavigationHistory.js
+            OpenLayers/Layer/WMTS.js
+            OpenLayers/Renderer/SVG.js
+            OpenLayers/Renderer/VML.js
+
+16. Manage all translations in one place. Translations for the mobile
+    application (layer names for example) are managed in the same place as for
+    the desktop application.
+    The following modifications are required.
+    Change the `jsbuild/mobile.cfg` file as follows:
+
+    @@ -8,6 +8,7 @@
+     root =
+         c2cgp_minimal/static/lib/cgxp/openlayers/lib
+         c2cgp_minimal/static/lib/cgxp/proj4js
+    +    c2cgp_minimal/static/js
+     first =
+         OpenLayers/SingleFile.js
+         OpenLayers/Console.js
+    @@ -20,6 +21,9 @@ first =
+         OpenLayers/BaseTypes/Size.js
+         OpenLayers/Util.js
+         OpenLayers/Lang.js
+    +    OpenLayers/Lang/fr.js
+    +    OpenLayers/Lang/en.js
+    +    OpenLayers/Lang/de.js
+         proj4js/lib/proj4js.js
+     exclude =
+     include =
+    @@ -45,3 +49,6 @@ include =
+         OpenLayers/Format/GML.js
+         OpenLayers/Strategy/Fixed.js
+         OpenLayers/Control/Zoom.js
+    +    Proj/Lang/fr.js
+    +    Proj/Lang/en.js
+    +    Proj/Lang/de.js
+
+
+    Also remove any lines for translations in `c2cgp_minimal/static/mobile/config.js`, and
+    replace them by the following lines:
+
+    OpenLayers.Util.extend(OpenLayers.Lang.en, {
+        "summits": "Summits",
+        "huts": "Huts",
+        "sites": "Sites",
+
+        // base layer switcher picker (you shouldn't remove this)
+        'layer_switcher.cancel': 'Cancel',
+        'layer_switcher.done': 'Done',
+
+        // login/logout
+        'loginButtonText': 'Log in',
+        'welcomeText': '<p>You are {username}.</p>',
+        'logoutButtonText': 'Log out',
+        'loginLabel': 'Login',
+        'passwordLabel': 'Password',
+        'loginSubmitButtonText': 'Submit',
+        'loginCancelButtonText': 'Cancel',
+
+        // redirect to standard application
+        'redirect_msg': "You're using the mobile version. Check out the" +
+            " <a href='${'${url}'}'>standard version</a>.",
+        'close': "Close"
+    });
+    OpenLayers.Util.extend(OpenLayers.Lang.fr, {
+        "summits": "Sommets",
+        "huts": "Cabanes",
+        "sites": "Sites",
+
+        // base layer switcher picker (you shouldn't remove this)
+        'layer_switcher.cancel': 'Annuler',
+        'layer_switcher.done': 'OK',
+
+        // login/logout
+        'loginButtonText': 'Me connecter',
+        'welcomeText': '<p>Vous êtes {username}.</p>',
+        'logoutButtonText': 'Me déconnecter',
+        'loginLabel': 'Nom',
+        'passwordLabel': 'Mot de passe',
+        'loginSubmitButtonText': 'Me connecter',
+        'loginCancelButtonText': 'Annuler',
+
+        // redirect to standard application
+        'redirect_msg': "Vous utilisez la version pour mobile. Vous pouvez aussi" +
+            " consulter la <a href='${'${url}'}'>version standard</a>.",
+        'close': "Fermer"
+    });
+    OpenLayers.Util.extend(OpenLayers.Lang.de, {
+        "summits": "Gipfel",
+        "huts": "Hütten",
+        "sites": "Sehenswürdigkeiten",
+
+        // base layer switcher picker (you shouldn't remove this)
+        'layer_switcher.cancel': 'Abbrechen',
+        'layer_switcher.done': 'OK',
+
+        // login/logout
+        'loginButtonText': 'Log in',
+        'welcomeText': '<p>Sie sind {username}.</p>',
+        'logoutButtonText': 'Log out',
+        'loginLabel': 'Login',
+        'passwordLabel': 'Passwort',
+        'loginSubmitButtonText': 'OK',
+        'loginCancelButtonText': 'Abbrechen',
+
+        // redirect to standard application
+        'redirect_msg': "Sie benutzen die mobile Version. Sie können auch" +
+            " die <a href='${'${url}'}'>Standardversion</a> benutzen.",
+        'close': "Schliessen"
+    });
+    OpenLayers.Lang.setCode("${lang}");
+
+17. The mobile application now has a built-in theme chooser.
+    Add the following line in the ``c2cgp_minimal/static/mobile/config.js`` file:
+
+    App.themes = '${themes | n}';
+
+    Both themes and layers can now be configured to be visible on desktop or
+    mobile, both or none.
+
+18. Public layers can no longer be edited (feature creation/update/deletion) by anonymous users.
+
+19. In the `c2cgp_minimal/templates/*.js` files remove the `getMatrix` method from the `WMTS_OPTIONS`.
+
+20. The LayerTree defaultThemes parameter has been separated in two to allow to handle separately
+    the default theme and the themes loaded from url.
+
+    In ``viewer.js`` replace:
+
+    % if permalink_themes:
+      defaultThemes: ${permalink_themes | n},
+    % else:
+      defaultThemes: ["lieu_interet_thm"],
+    % endif
+
+    by:
+
+    % if permalink_themes:
+        permalinkThemes: ${permalink_themes | n},
+    % endif
+    defaultThemes: ["to_be_defined"],
+
+21. Add the new configuration to the ``cgxp_querier`` plugin in the
+    ``c2cgp_minimal/templates/viewer.js`` file:
+
+        attributeURLs: ${queryer_attribute_urls | n}
+
+22. Add missing ``c2cgp_minimal/static/mobile/resources/css/app.css`` line in the ``.gitignore`` file,
+    and remove the related file:
+
+    git rm -f c2cgp_minimal/static/mobile/resources/css/app.css
+
+23. Adaptations for generic backend usage necessitate the following change.
+
+    In the ``jsbuild/app.cfg`` file, add ``CGXP/cgxp.js`` in ``[app.js]``,
+    ``[edit.js]``, ``[routing.js]`` and ``[xapi.js]`` in the ``include =`` block,
+    before any other CGXP/* entries.
+
+    for example:
+
+    include =
+        EPSG21781.js #proj4js
+        util.js #GXP
+        widgets/Viewer.js #GXP
+        DragTracker.js #ext.overrides
+        CGXP/cgxp.js
+        CGXP/plugins/ThemeSelector.js
+        ...
+
+24. Add the following line in the ``apache/wsgi.conf.in``:
+
+    RewriteRule ^${vars:apache-entry-point}routing/?$ /${vars:instanceid}/wsgi/routing [PT]
+
+25. Change the `X-UA-Compatible` meta in the HTML templates, and other little
+    things to do: in `c2cgp_minimal/templates/index.html`:
+
+    - <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9">
+    + <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9; IE=EmulateIE10">
+
+    in `c2cgp_minimal/templates/edit.html`:
+
+    - <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+    + <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9; IE=EmulateIE10">
+      <title>c2cgp_minimal Geoportal Editor</title>
+    - <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    + <link rel="shortcut icon" type="image/x-icon" href="${request.static_url('c2cgp_minimal:static/images/favicon.ico')}">
+
+    in `c2cgp_minimal/templates/routing.html`:
+
+    - <meta name="keywords" content="c2cgp_minimal, mapfish, editor, geoportal">
+    - <meta name="description" content="c2cgp_minimal Geoportal Editor.">
+    - <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+    + <meta name="keywords" content="c2cgp_minimal, mapfish, routing, geoportal">
+    + <meta name="description" content="c2cgp_minimal Routing.">
+    + <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9; IE=EmulateIE10">
+      <title>c2cgp_minimal Routing</title>
+    - <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    + <link rel="shortcut icon" type="image/x-icon" href="${request.static_url('c2cgp_minimal:static/images/favicon.ico')}">
+
+    in `c2cgp_minimal/templates/edit.js`:
+
+    - var THEMES = {
+      var THEMES = {
+
+26. in the `c2cgp_minimal/templates/api/api.js`` and
+    `c2cgp_minimal/templates/api/xapi.js`` files you should remove the line:
+
+    -        OpenLayers.IMAGE_RELOAD_ATTEMPTS = 2;
+
+    in the `c2cgp_minimal/templates/api/mapconfig.js`` file you should remove the lines:
+
+    +            ...
+    -            ..., # just remove the comma
+    -            getMatrix: function() {
+    -                return {
+    -                    identifier: OpenLayers.Util.indexOf(
+    -                                    this.serverResolutions,
+    -                                    this.map.getResolution())
+    -                };
+    -            }
+
+27. In the mobile application, modify `c2cgp_minimal/static/mobile/config.js` as follows:
+
+    -allLayers: "${layers}",
+    +allLayers: '${layers | n}',
+
+    And the Overlay (`Openlayers.Layer.WMS`) layer should be named as 'overlay'.
+
+28. Currently the `Settings` view in the mobile application is not scrollable.
+    Add the following in `c2cgp_minimal/static/mobile/app/view/Settings.js` in the config object:
+
+    scrollable: 'vertical',
+
+29. Version 1.4 adds support for WMSTime layer which requires the isodate library
+    for parsing dates from the mapfile. The isodate version should be added to
+    `versions.cfg`:
+
+    isodate=0.4.9
+
+    Note: The default time value specified in the map file ("wms_timedefault") is
+    not currently taken into account due to a limitation in the OWSLib, see:
+    https://github.com/geopython/OWSLib/pull/92
+
+30. In the `jsbuild/app.cfg` file set all the `root` sections to:
+
+    c2cgp_minimal/static/lib/cgxp/core/src/script
+    c2cgp_minimal/static/lib/cgxp/ext
+    c2cgp_minimal/static/lib/cgxp/geoext/lib
+    c2cgp_minimal/static/lib/cgxp/openlayers/lib
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthView/lib
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/Spherical/lib
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/URLCompressed/lib
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/DynamicMeasure/lib
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/AddViaPoint/lib
+    c2cgp_minimal/static/lib/cgxp/gxp/src/script
+    c2cgp_minimal/static/lib/cgxp/proj4js
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/Measure/lib
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/SimplePrint/lib
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureEditing/lib
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureSelectionModel/lib
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/WMSBrowser/lib
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/StreetViewPanel
+    c2cgp_minimal/static/lib/cgxp/sandbox
+    c2cgp_minimal/static/lib/cgxp/styler/lib
+    c2cgp_minimal/static/lib/cgxp/ext.ux/TwinTriggerComboBox
+    c2cgp_minimal/static/lib/cgxp/ext.ux/GroupComboBox
+    c2cgp_minimal/static/lib/cgxp/ext.ux/ColorPicker
+    c2cgp_minimal/static/lib/cgxp/ext.ux/base64
+    c2cgp_minimal/static/lib/cgxp/ext.overrides
+    c2cgp_minimal/static/lib/cgxp/dygraphs
+    c2cgp_minimal/static/js
+
+31. In the `jsbuild/app.cfg` file remove from the `include` section
+    of `[app.js]` the line:
+
+    DragTracker.js #ext.overrides
+
+32. If the FullTextSearch has a configuration in the ``config.yaml.in`` file,
+    do the following changes::
+
+    - fulltextsearch_maxlimit: 200
+    - fulltextsearch_defaultlimit: 30
+    + fulltextsearch:
+    +     maxlimit: 200
+    +     defaultlimit: 30
+
+33. Mobile application updates. ``config.js`` needs to be changed as following.
+
+    The ``overlay`` layer config should be removed. Only the background layers
+    should now be listed in the map config.
+
+    Ensure that the following variables are defined:
+
+        App.themes = '${themes | n}';
+        App.WFSTypes = '${wfs_types | n}';
+
+Version 1.3.2
+=============
+
+1. Correct the mobile apache rewrite rules, in the 'apache/wsgi.conf.in' file
+   do the following changes:
+
+-RewriteRule ^${vars:apache-entry-point}mobile/?$ /${vars:instanceid}/wsgi/mobile/ [PT]
++RewriteRule ^${vars:apache-entry-point}mobile$ ${vars:apache-entry-point}mobile/ [R]
++RewriteRule ^${vars:apache-entry-point}mobile/(.*)$ /${vars:instanceid}/wsgi/mobile/$1 [PT]
+
+2. Camptocamp pypi repository is now public. As a result the `.httpauth` file
+   may be removed:
+
+    git rm .httpauth
+
+3. Remove all the `[versions]` section from your `buildout.cfg` file,
+   from now it's managed in the `versions.cfg` file.
+
+   Add the new `versions.cfg`file to Git:
+
+        git add versions.cfg
+
+
+Version 1.3.1
+=============
+
+1. One can now define a "default mobile theme" in the config.yaml configuration
+   file. The default theme is the theme loaded when no theme is specified in
+   the query string of the mobile app URL (/mobile). For example:
+
+       mobile_default_theme: my_main_mobile_theme
+
+   Not setting the mobile_default_theme in config.yaml is perfectly valid. In
+   that case there's no "default mobile theme", and no theme information will
+   be passed to the config.js template.
+
+   Even if you don't need a "default mobile theme" it is recommended to set
+   mobile_default_theme to "None" in config.yaml, with an appropriate text
+   describing the role of this setting. For example:
+
+       # The name of the theme to use as the default theme for the
+       # mobile app. The default theme is the theme loaded when no
+       # theme name is specified in the mobile app URL. If unset
+       # then there's no default theme, and no theme information
+       # will be passed to the config.js template.
+       mobile_default_theme:
+
+2. To make the `X-UA-Compatible` work again in the
+   `c2cgp_minimal/templates/index.html` file the following block should be moved
+   below all the <meta> tags:
+
+        % if not no_redirect and mobile_url is not None:
+                <script>
+                    if(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+                        window.location = "${mobile_url}";
+                    }
+                </script>
+        % endif
+
+3. The default value for `fallThrough` changed in OpenLayers. This has caused
+   a major regression in the mobile app, where longpress queries no longer
+   work.
+
+   To fix it edit c2cgp_minimal/static/mobile/config.js and add `fallThrough: true`
+   to the map config, before `theme: null` for example:
+
+
+        App.map = new OpenLayers.Map({
+            fallThrough: true, // required for longpress queries
+            theme: null,
+            ...
+        });
+
+4. Be sure that you don't use the ``SQLAlchemy`` 0.8 by having those dependencies
+   in the ``[versions]`` section of ``buildout.cfg`` file::
+
+        sqlalchemy = 0.7.9
+        sqlalchemy-migrate = 0.7.2
+
+
+Version 1.3
+===========
+
+1. The c2cgeoportal mobile application now supports authentication, and dynamic
+   theme/layer configuration based on the database configuration. This requires
+   a few changes to existing applications.
+
+   The c2cgeoportal mobile functions to be configured as view callables in the
+   application are now part of the c2cgeoportal entry.py view module. This
+   change requires changing the way mobile views should be defined in the
+   application. Edit c2cgp_minimal/__init__.py and replace the entire "# mobile
+   views and routes" block by the one provided in the "mobile" chapter of the
+   integrator doc [*]. Do not forget to replace "<package_name>" by
+   "c2cgp_minimal" in the new route and view definitions.
+
+   [*] <http://docs.camptocamp.net/c2cgeoportal/integrator/mobile.html#adding-mobile-routes-and-views>
+
+   To use the "Login" view component as documented in the mobile chapter of the
+   documentation you need to have the following line in
+   c2cgp_minimal/static/mobile/config.js:
+
+   App.info = '${info | n}';
+
+   You should add this line even if you don't use the "Login" component.
+
+2. Adding the following entries to all the ``root`` lists in
+   ``jsbuild/app.cfg`` is recommended:
+
+        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/WMSBrowser/lib
+        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/StreetViewPanel
+
+3. Adding the following entry at the end of the ``first`` sections
+   of all files (except the language ones) in ``jsbuild/app.cfg`` is recommended:
+
+        proj4js/lib/projCode/merc.js
+
+4. Adding the following entry to the ``include`` section
+   of ``[lang-fr.js]`` in ``jsbuild/app.cfg`` recommended:
+
+        GeoExt.ux/locale/WMSBrowser-fr.js
+
+   Same for ``[lang-de.js]``.
+
+5. Auto redirection to mobile application has been added.
+
+   Add the following in the ``c2cgp_minimal/templates/index.html`` for the main
+   application just after the ``<head>`` opening tag:
+
+        % if not no_redirect and mobile_url is not None:
+                <script>
+                    if(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+                        window.location = "${mobile_url}";
+                    }
+                </script>
+        % endif
+
+   You'll also need to add the following translations for the mobile
+   application in ``config.js``:
+
+           // redirect to standard application
+           'redirect_msg': "Vous utilisez la version mobile. Vous pouvez aussi" +
+               " consulter la <a href='${'${url}'}'>version standard</a>.",
+           'close': "Fermer"
+
+   Once redirected to the mobile version, tablet users can go back to standard
+   application. In order for them to navigate in the map comfortably, it's
+   recommended to add the support for pinch zoom. You'll need to add the
+   following to the [app.js] section of ``jsbuild/app.cfg`` right below the
+   include for ``Navigation.js``:
+
+       OpenLayers/Control/PinchZoom.js
+
+6. Adding ``geodesic: true`` to the ``OpenLayers.Control.ScaleLine`` configuration
+   in ``viewer.js``, ``edit.js`` (as well as other templates or Javascript files
+   using that kind of control) might solve incorrect scalelines with mercator
+   projections.
+
+7. The geolocate functionality of the mobile application has been refactored.
+   It is required to add the following line to the list of includes in
+   ``jsbuild/mobile.cfg``:
+
+        OpenLayers/Control/Zoom.js
+
+8. In the file `apache/wsgi.conf.in` remove the trailing '/' in the `edit`
+   `RewriteRule`.
+
+-RewriteRule ^${vars:apache-entry-point}edit/?$ /${vars:instanceid}/wsgi/edit/ [PT]
++RewriteRule ^${vars:apache-entry-point}edit/?$ /${vars:instanceid}/wsgi/edit [PT]
+
+9. On the API help we have some issue with IE7 and IE8, to fix them you
+   should apply the same modification as in the following commit:
+   https://github.com/camptocamp/c2cgeoportal/commit/3a8f0e4d87ab4199d474c0e8ed6cc33038e2e795
+   or regenerate the API help:
+
+        ./buildout/bin/pcreate -s c2cgeoportal_create /tmp/c2cgp_minimal package=c2cgp_minimal
+        cp -r /tmp/c2cgp_minimal/c2cgp_minimal/templates/api/apihelp.html c2cgp_minimal/templates/api
+        cp -r /tmp/c2cgp_minimal/c2cgp_minimal/templates/api/xapihelp.html c2cgp_minimal/templates/api
+        rm -rf /tmp/c2cgp_minimal
+
+10. c2cgeoportal 1.3 requires papyrus 0.10dev1. If papyrus is set to 0.9 or
+    lower in the [versions] section of buildout.cfg, change it to 0.10dev1.
+
+11. In the file `c2cgp_minimal/templates/edit.html` you should add
+    the `${extra_params}` value:
+
+-        <script type="text/javascript" src="${request.route_url('edit.js')}"></script>
++        <script type="text/javascript" src="${request.route_url('edit.js')}${extra_params}"></script>
+
+12. Don't need anymore to specify the queryableLayers in th API.
+    Than you should do on your `c2cgp_minimal/templates/api/api.js`
+    and in `c2cgp_minimal/templates/api/xapi.js` do this replacement:
+
+-    this.queryableLayers = [<...>];
++    this.queryableLayers = ${queryable_layers|n};
+
+
+Version 1.2
+===========
+
+1. A new ``Settings`` view has been added to the mobile application as well as a
+   ``custom.scss`` stylesheet file. Both are intended to be customized by the
+   integrator.
+   Check out documentation to find information about how to upgrade an existing
+   c2cgeoportail project or how the settings view can be customized.
+
+   As minimal you should get the new files:
+
+        ./buildout/bin/pcreate -s c2cgeoportal_create \
+                /tmp/c2cgp_minimal package=c2cgp_minimal
+        cp -r /tmp/c2cgp_minimal/c2cgp_minimal/static/mobile/custom.scss c2cgp_minimal/static/mobile/
+        cp -r /tmp/c2cgp_minimal/c2cgp_minimal/static/mobile/app/ c2cgp_minimal/static/mobile/
+        rm -rf /tmp/c2cgp_minimal
+
+2. CGXP plugin WFSGetFeature now requires that the themes are explicitly passed
+   in its configuration in c2cgp_minimal/templates/viewer.js using the following
+   parameter:
+
+    themes: THEMES
+
+3. In the mobile application, the buttons' text in the picker for the layer
+   switcher (on phones) can now be translated.
+
+   Add the following in the OpenLayers.Lang.xx section of your `config.js` file:
+
+    // picker
+    'layer_switcher.cancel': 'Annuler',
+    'layer_switcher.done': 'OK'
+
+4. A new caching system has been introduced and it has to be configured in the
+   config.yaml file. So you have to edit ``config.yaml.in`` and
+   ``config_child.yaml.in`` files to add the following configuration:
+
+    # The dogpile.cache configuration.
+    #
+    # Do not touch if unsure.
+    #
+    # The cache section below takes three properties:
+    #
+    # - backend: the name of the cache backend (ex: dogpile.cache.memory,
+    #   dogpile.cache.memcached, etc.). Mandatory.
+    # - expiration_time: the cache expiration time. Optional (infinite if not
+    #   specified).
+    # - arguments: backend-specific arguments. Optional.
+    #
+    # Here is a dogpile.cache configuration example for the memcached backend
+    # (equivalent of http://dogpilecache.readthedocs.org/en/latest/api.html#dogpile.cache.backends.memcached.MemcachedBackend)
+    # cache:
+    #   backend: dogpile.cache.memcached
+    #   expiration_time: 3600
+    #   arguments:
+    #     url: 127.0.0.1:11211
+    cache:
+      backend: dogpile.cache.memory
+
+   The caching system also refactored the way errors are handled: all errors
+   are now stored in ``serverError``, while ``themesError`` is not used
+   anymore.  So you have to edit all template files (``templates/viewer.js``,
+   ``templates/edit.js``, ``templates/apiviewer.js``) to remove the following
+   line:
+
+    /* errors (if any): ${themesError | n} */
+
+5. Some updates will be do in the `edit.js` and in the `viewer.js`, the actual code
+   will still work, it your interested in have a look at:
+   https://github.com/camptocamp/c2cgeoportal/pull/354
+
+6. CGXP now uses the GeOrchestra styler, which includes its own en, fr,
+   and de translations. Edit jsbuild/app.cfg, and in the [lang-en.js],
+   [lang-fr.js], and [lang-de.js] sections replace
+
+   - Styler/resources/lang/en.js by Styler/lang/en.js
+   - Styler/resources/lang/fr.js by Styler/lang/fr.js
+   - Styler/resources/lang/de.js by Styler/lang/de.js
+
+   The Styler/resources/lang/en.js, Styler/resources/lang/fr.js, and
+   Styler/resources/lang/de.js files no longer exist, so you will get
+   an error during the execution of the jsbuild part if you do not
+   do these replacements.
+
+7. It is now possible to disable the administration interface, for example on
+   productive instances of the application. To do so:
+
+   a. Edit the main() function in c2cgp_minimal/__init__.py and use
+
+       from pyramid.settings import asbool
+       if asbool(config.get_settings().get('enable_admin_interface')):
+           config.formalchemy_admin('admin', package='c2cgp_minimal',
+                   view='fa.jquery.pyramid.ModelView', factory=FAModels)
+
+      instead of
+
+       config.formalchemy_admin('admin', package='c2cgp_minimal',
+               view='fa.jquery.pyramid.ModelView', factory=FAModels)
+
+   b. Add the following parameter in the ``[app:app]`` section of
+      production.ini.in/developement.ini.in:
+
+       enable_admin_interface = ${vars:enable_admin_interface}
+
+   c. Add the following parameter in the ``[vars]`` section of buildout.cfg:
+
+       enable_admin_interface = true
+
+   d. Adapt the latter parameter value in the buildout_*.cfg files.
+
+8. CGXP's FullTextSearch's plugin now allows to group results by their
+   corresponding type.
+
+   a. We recommend you add the following to the root list in the app.js section
+      of ``app.cfg``:
+
+       c2cgp_minimal/static/lib/cgxp/ext.ux/GroupComboBox
+
+   b. If you want the results to be grouped, add a ``grouping`` option to the
+      FullTextSearch plugin in ``viewer.js`` as well as the following line in
+      the include list in the app.js section of ``app.cfg``:
+
+       Ext/ux/form/GroupComboBox.js
+
+9. A new parameter, layerManagerUrl, has been added to the cgxp_redlining plugin,
+   to fix a problem with the base url used to access various resources used in
+   the related layerManager widget:
+
+        {
+            ptype: "cgxp_redlining",
+            toggleGroup: "maptools",
+            actionTarget: "center.tbar",
+            layerManagerUrl: "${request.static_url('c2cgp_minimal:static/lib/cgxp/sandbox/LayerManager/ux/')}"
+        },
+
+10. The ``functionality`` variable available in Mako templates (e.g. ``viewer.js``)
+    used to be a string. It is now a dict.
+    See https://github.com/camptocamp/c2cgeoportal/pull/400. To accomodate
+    this change in your project you need to
+
+    - Remove the FUNCTIONALITY JavaScript variable from viewer.js and
+      edit.js. This line:
+
+          var FUNCTIONALITY = ${functionality | n};
+
+    - Change the value for the ``defaultBaseLayerRef`` config option of the
+      MapOpacitySlider plugin from ``FUNCTIONALITY.default_basemap[0]`` to:
+
+          defaultBaseLayerRef: "${functionality['default_basemap'][0] | n}"
+
+    Also, if you used ``c2cgeoportal.lib.functionality.get_functionality``
+    in your templates you no longer need to, use ``functionality`` directly.
+
+11. checker_pdf requires that the central coordinates and scale of the map to
+    print when checking the printing service are provided in ``config.yaml.in``.
+    Add the following after the ``tilecache_url``:
+
+        # Checker configuration
+        checker:
+            print_template: 1 A4 portrait
+            print_center_lon: to be defined
+            print_center_lat: to be defined
+            print_scale: 10000
+            fulltextsearch: text to search
+
+12. c2cgeoportal applications created with the c2cgeoportal 1.2 scaffolds
+    include two JavaScript APIs : Simple API and Extended API. This has
+    a few implications on existing applications, whether you want your
+    applications to expose the JavaScript APIs or not.
+
+    Project Lang Files (c2cgp_minimal/static/js/Lang)
+
+        You need to split each lang file into two files. For example,
+        c2cgp_minimal/static/js/Proj/Lang/fr.js should be splitted into
+        c2cgp_minimal/static/js/Proj/Lang/fr.js and
+        c2cgp_minimal/static/js/Proj/Lang/GeoExt-fr.js. The former should include
+        OpenLayers-based translations only, and the latter should include
+        GeoExt-based translations only. If your application does not have
+        GeoExt-based translations (which is a good thing), you will need to
+        create an empty c2cgp_minimal/static/js/Proj/Lang/GeoExt-fr.js file. And you
+        obviously need to repeat this GeoExt-en.js and GeoExt-de.js.
+
+    JavaScript Build Config (jsbuild/app.cfg)
+
+        The c2cgp_minimal/static/js/Proj/Lang/GeoExt-<code>.js files should now be
+        listed in the ``include`` list of ``[lang-<code>.js]`` sections. For
+        example:
+
+            [lang-fr.js]
+            root =
+                ...
+            first =
+                OpenLayers/Lang/fr.js
+            include =
+                Ext/src/locale/ext-lang-fr.js
+                GeoExt/locale/GeoExt-fr.js
+            # FeatureEditing/resources/lang/en.js
+                FeatureEditing/resources/lang/fr.js
+                Styler/lang/fr.js
+                locale/fr.js
+                CGXP/locale/fr.js
+                Proj/Lang/fr.js
+                Proj/Lang/GeoExt-fr.js
+            exclude =
+                OpenLayers/Lang.js
+
+        And if you do want your application to expose the APIs you need to edit
+        jsbuild/app.cfg, remove the previous ``[api.js]`` section and add new
+        sections ``[api.js]``, ``[api-lang-en.js]``, ``[api-lang-fr.js]``,
+        ``[api-lang-de.js]``, and ``[xapi.js]``. See
+        https://github.com/camptocamp/c2cgeoportal/blob/master/c2cgeoportal/scaffolds/create/jsbuild/app.cfg_tmpl
+        for the actual content of these new sections.
+
+    Application-level CSS
+
+        The c2cgp_minimal/static/css/proj.css include the application-level CSS.
+        This file should be splitted into three files:
+
+        - c2cgp_minimal/static/css/proj.css
+        - c2cgp_minimal/static/css/proj-map.css
+        - c2cgp_minimal/static/css/proj-widgets.css
+
+        proj-map.css is used by the main application viewers (viewer.js and
+        edit.js), the Simple API, and the Extended API. It shouldn't include
+        any Ext-related CSS.
+
+        proj-widgets.css is used by the main application viewers and the Extended
+        API. It should include CSS that for the CGXP plugins.
+
+        proj.css is used by the main application viewers only. It should there
+        include CSS that is relative to the application layout.
+
+        If you don't care about the APIs and do not want to split your proj.css
+        file into three files as explained above you will still need to create
+        empty files for proj-map.css and proj-widgets.css, otherwise the cssmin
+        buildout part will fail, and your application pages will cause 404s
+        in debug mode.
+
+    Make index.html and edit.html load the new CSS files in debug mode.
+
+        You need to edit index.html and edit.html to make these pages load
+        the new proj-map.css and proj-widgets.css files when in debug mode.
+        This is done by adding the following <link> tags below that for
+        proj.css:
+
+            <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/css/proj-map.css')}" />
+            <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/css/proj-widgets.css')}" />
+
+    Adding the APIs to your application
+
+        The easiest is to apply the ``c2cgeoportal_create`` template to
+        create a temporary project and copy the API files from this
+        temporary project to yours::
+
+        $ cd c2cgp_minimal
+        $ ./buildout/bin/pcreate -s c2cgeoportal_create \
+                /tmp/c2cgp_minimal package=c2cgp_minimal
+        $ cp -r /tmp/c2cgp_minimal/c2cgp_minimal/templates/api c2cgp_minimal/templates/
+        $ cp -r /tmp/c2cgp_minimal/c2cgp_minimal/static/apihelp c2cgp_minimal/static/
+        $ rm -rf /tmp/c2cgp_minimal
+
+    Clean up (remove old API-related files)
+
+        $ cd c2cgp_minimal
+        $ rm -f c2cgp_minimal/static/js/api/Map.js
+        $ rm -f c2cgp_minimal/templates/apihelp.html
+        $ rm -f c2cgp_minimal/templates/apiloader.js
+        $ rm -f c2cgp_minimal/templates/apiviewer.js
+
+    Add RewriteRule's to Apache config
+
+        The apache/wsgi.conf.in file defines RewriteRule's for shorter
+        URLs to the application's entry points.
+
+        Add the following API-related RewriteRule's:
+
+        RewriteRule ^${vars:apache-entry-point}api.js$ /${vars:instanceid}/wsgi/api.js [PT]
+        RewriteRule ^${vars:apache-entry-point}xapi.js$ /${vars:instanceid}/wsgi/xapi.js [PT]
+        RewriteRule ^${vars:apache-entry-point}xapihelp.html$ /${vars:instanceid}/wsgi/xapihelp.html [PT]
+
+        And remove this one:
+
+        RewriteRule ^${vars:apache-entry-point}apiloader.js$ /${vars:instanceid}/wsgi/apiloader.js [PT]
+
+13. Add the following lines in `apache/wsgi.conf.in` to enable short URLs
+    for the editing, mobile and admin pages:
+
+    RewriteRule ^${vars:apache-entry-point}edit/?$ /${vars:instanceid}/wsgi/edit/ [PT]
+    RewriteRule ^${vars:apache-entry-point}mobile/?$ /${vars:instanceid}/wsgi/mobile/ [PT]
+    RewriteRule ^${vars:apache-entry-point}admin/?$ /${vars:instanceid}/wsgi/admin/ [PT]
+
+14. Redlining is now supported in CGXP's Permalink.
+    The following path should be added in all root sections
+    of `jsbuild/app.cfg`:
+
+    c2cgp_minimal/static/lib/cgxp/openlayers.addins/URLCompressed/lib
+
+15. CGXP's Redlining plugin (drawing tools) has been enhanced. It requires the
+    following updates:
+
+    - In ``app.cfg`` you need to replace the lines with:
+
+        CGXP/widgets/RedliningColorPicker.js
+
+    by:
+
+        CGXP/plugins/Redlining.js
+
+    - In the ``index.html`` template, in the section where the css files are
+      loaded in debug mode, you'll have to add the following code right above
+      the one for ``proj.css``:
+
+        <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/lib/cgxp/ext/Ext/examples/ux/css/Spinner.css')}" />
+
+16. Update the checker for the new api, in the section `check_collector` the
+    `checker_apiloader` doesn't exists anymore,
+    it's replaced by `checker_api`, and `checker_xapi`.
+
+17. The fulltextsearch web service supports a new parameter in the query
+    string, "partitionlimit". If "partitionlimit" is set to a positive number
+    the fulltextsearch web service limits the search results by layer
+    (layer_name field in the tsearch table). For example, if "partitionlimit"
+    is set to 10 and "limit" is set to 40, the response will include at most
+    10 results per layer, and at 40 results total. For this to take effect
+    in the viewer CGXP commit [*] or more recent should be used.
+
+    [*] https://github.com/camptocamp/cgxp/commit/b620dd154b55c6f14eee8fdc09abb5583615d78b
+
+18. In the file `jsbuild/app.cfg`, for file `[lang-en.js]`, in section `include`:
+    remove the line `CGXP/locale/en.js`, and add the localisation in the files:
+
+    `c2cgp_minimal/static/js/Proj/Lang/en.js`:
+    "layertree": "Themes"
+
+    `c2cgp_minimal/static/js/Proj/Lang/fr.js`:
+    "layertree": "Thèmes"
+
+    `c2cgp_minimal/static/js/Proj/Lang/de.js`:
+    "layertree": "Themen"
+
+
+Version 1.1
+===========
+
+1. Add the following line to the jsbuild/mobile.cfg file in the include section:
+
+    OpenLayers/Control/Geolocate.js
+
+2. For the FeaturesWindow CGXP plugin we need to add the following line to the
+   jsbuild/app.cfg file in the root sections:
+
+    c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureSelectionModel/lib
+
+3. The admin interface relies on the js.jqueryui_selectmenu Python package,
+   which does not work with js.jquery > 1.7.1 (the Jump to... dropdown does not
+   work). c2cgeoportal 1.1 will refuse to work with/be installed alongside
+   js.jquery > 1.7.1. Just make sure js.jquery is not set to a version > 1.7.1
+   in your project's buildout config (buildout.cfg.). If it is then change that
+   to "js.jquery = 1.7.1", and execute buildout again.
+
+4. Currently there are authentication-related issues when multiple instances of
+   a c2cgeoportal application are running on the same machine. Indeed, loging
+   into one instance would log you out of from the instance you're currently
+   loged into. See <https://github.com/camptocamp/c2cgeoportal/issues/196>.
+
+   Fixing the issue requires manual changes to development.ini.in,
+   production.ini.in, and c2cgp_minimal/__init__.py.
+
+   Edit development.ini.in and production.ini.in and add the following
+   variable definition to the [app:app] section:
+
+       authtkt_cookie_name = auth_tkt_${instanceid}
+
+   (It is probably a good idea to group the definitions of authtkt_secret and
+   authtkt_cookie_name together, as they're both related to authentication.)
+
+   Now edit c2cgp_minimal/__init__.py to pass a `cookie_name` to the
+   `AuthTktAuthenticationPolicy` constructor:
+
+        authentication_policy = AuthTktAuthenticationPolicy(
+                settings.get('authtkt_secret'),
+                callback=defaultgroupsfinder,
+                cookie_name=settings.get('authtkt_cookie_name'))
+
+
+Version 1.0
+===========
+
+1. We create a configuration file, config.yaml includes the static
+   configuration of the application. buildout.cfg includes the execution
+   environment configuration, where environment variables are defined.
+
+   To create an initial configuration from your current configurations you
+   should:
+
+   - Rollback the CONST_buildout.cfg:
+       git checkout CONST_buildout.cfg
+
+   - If you are a child make sure that you have a variable
+       ``parent_instanceid`` defined in the ``[vars]`` section
+       of the ``buildout.cfg`` file.
+
+   - Create a file named 'config.yaml.in' that contains, for a parent:
+
+# ------------------------------------------------------------------------
+# The application's default language. This is the language
+# used if no language is specific by the application user.
+# This also defines the language used for the text search.
+default_locale_name: ${default_language}
+
+# The set of languages supported by the applications.
+TODO fix the array (comma is missing)
+available_locale_names: [${available_languages}]
+
+admin_interface:
+# Default values for the admin interface's maps.
+    map_x: ${formalchemy_default_lon}
+    map_y: ${formalchemy_default_lat}
+    map_zoom: ${formalchemy_default_zoom}
+
+# The list of functionalities that can be configured
+# through the admin interface.
+TODO fix the array (comma is missing)
+    available_functionalities: [${formalchemy_available_functionalities}]
+
+functionalities:
+# Functionalities that are accessible to anonymous
+# users.
+    anonymous: ${anonymous_functionalities}
+
+# Functionalities that are accessible to authenticated
+# users with no associated functionalities in the
+# database.
+    registered: ${registered_functionalities}
+
+# Functionalities that are made available to Mako templates.
+TODO fix the array (comma is missing)
+    available_in_templates: [${webclient_string_functionalities}, ${webclient_array_functionalities}]
+
+# Define URLs to the parent application. Only useful is
+# this application is a child application in a parent/child
+# architecture.
+external_themes_url:
+external_mapserv_url:
+
+# The "raster web services" configuration. See the "raster"
+# chapter in the integrator documentation.
+raster:
+
+# For mapserver proxy
+mapserv_url: http://$${vars:host}/$${vars:instanceid}/mapserv
+
+# For print proxy
+print_url: http://$${vars:host}:8080/print-c2cgeoportal-$${vars:instanceid}/pdf/
+
+# For base layers
+# Nothing => gets the URL using the pyramid routes
+tilecache_url:
+# ------------------------------------------------------------------------
+
+        for a child:
+# ------------------------------------------------------------------------
+# The application's default language. This is the language
+# used if no language is specific by the application user.
+# This also defines the language used for the text search.
+default_locale_name: ${default_language}
+
+# The set of languages supported by the applications.
+TODO fix the array (comma is missing)
+available_locale_names: [${available_languages}]
+
+admin_interface:
+# Default values for the admin interface's maps.
+    map_x: ${formalchemy_default_lon}
+    map_y: ${formalchemy_default_lat}
+    map_zoom: ${formalchemy_default_zoom}
+
+# The list of functionalities that can be configured
+# through the admin interface.
+TODO fix the array (comma is missing)
+    available_functionalities: [${formalchemy_available_functionalities}]
+
+functionalities:
+# Functionalities that are accessible to anonymous
+# users.
+    anonymous: ${anonymous_functionalities}
+
+# Functionalities that are accessible to authenticated
+# users with no associated functionalities in the
+# database.
+    registered: ${registered_functionalities}
+
+TODO fix the array (comma is missing)
+    available_in_templates: [${webclient_string_functionalities}, ${webclient_array_functionalities}]
+
+# Define URLs to the parent application. Only useful is
+# this application is a child application in a parent/child
+# architecture:
+external_themes_url: http://$${vars:host}/$${vars:parent_instanceid}/wsgi/themes
+external_mapserv_url: http://$${vars:host}/$${vars:parent_instanceid}/mapserv
+
+# The "raster web services" configuration. See the "raster"
+# chapter in the integrator documentation.
+raster:
+
+# For mapserver proxy
+mapserv_url: http://$${vars:host}/$${vars:instanceid}/mapserv
+
+# For print proxy
+# This value mean that we use the parent print server
+print_url: http://$${vars:host}:8080/print-c2cgeoportal-$${vars:parent_instanceid}/pdf/
+
+# For base layers
+# This value mean that we use the parent tiles
+tilecache_url: http://$${vars:host}/$${vars:parent_instanceid}/wsgi/tilecache
+# ------------------------------------------------------------------------
+
+    - Then interpretate it by running:
+        ./buildout/bin/buildout install template
+
+    - Rename the generated file as the source file:
+        mv config.yaml config.yaml.in
+
+    - In this file (config.yaml.in) there are some lines that contain
+        « TODO fix the array (comma is missing) ». This indicates that the
+        array is not correctly formatted. Fix the formatting by adding the
+        missing comma and remove the TODO lines.
+
+    - Add the config in the repository
+        git add config.yaml.in
+
+    - Add config.yaml in the .gitignore file
+
+    - In the file tilecache/tilecache.cfg.in replace:
+
+        url = ${mapserv_url}
+        by:
+        url = http://${vars:host}/${vars:instanceid}/mapserv
+
+        and
+
+        wmts_gettile = ${wmts_url}
+        by
+        wmts_gettile = http://${vars:host}/${vars:instanceid}/tilecache
+
+    - In the file mapserver/c2cgeoportal.map.in replace:
+
+        "wms_onlineresource" "http://${vars:wsgi_host}/${vars:instanceid}/wsgi/mapserv_proxy"
+        by
+        "wms_onlineresource" "http://${vars:host}/${vars:instanceid}/wsgi/mapserv_proxy"
+
+    - Add the following line in the [app:c2cgp_minimal] of the production.ini.in
+            and the developement.ini.in:
+        app.cfg = %(here)s/config.yaml
+
+    - Remove the following attributes from the production.ini.in
+            developement.ini.in, an buildout.cfg files:
+        default_locale_name
+        available_languages
+        default_language
+        mapserv.url
+        print.url
+        formalchemy_default_zoom
+        formalchemy_default_lon
+        formalchemy_default_lat
+        formalchemy_available_functionalities
+        raster
+        anonymous_functionalities
+        registered_functionalities
+        webclient_string_functionalities
+        webclient_array_functionalities
+        external_themes_url
+        external_mapserv_url
+        tilecache_url
+
+    - Re apply the update scaffold to regenerate the CONST_buildout file:
+        ./buildout/bin/pcreate --interactive -s c2cgeoportal_update ../c2cgp_minimal package=c2cgp_minimal
+
+    - In the file ``print/templates/print.mako.in`` replace
+        ``${vars:mapserv_host}`` and ``${vars:wsgi_host}`` by ``${vars:host}``.
+
+    - In the file ``./apache/mapserver.conf.in`` remove the line
+        Allow from ${vars:mapserv_host}
+        we will use only ${vars:mapserv_allow}
+
+    - Edit ``c2cgp_minimal/templates/viewer.js`` and ``c2cgp_minimal/templates/edit.js`` and change
+
+          % if len(tilecache_url) == 0
+
+          to
+
+          % if not tilecache_url or len(tilecache_url) == 0:
+
+2. Theme loading with Friendly Url
+
+   It is now possible to load themes directly from a Friendly Url of the type:
+   http://www.example.com/theme/themename1/themename2[/themenamex]
+
+   The following modifications are needed:
+
+   - In viewer.js in the cgxp_layertree plugin configuration, replace:
+       defaultThemes: ["xyz"],
+     by:
+       % if permalink_themes:
+         defaultThemes: ${permalink_themes | n},
+       % else:
+         defaultThemes: ["xyz"],
+       % endif
+
+   - In index.html, replace:
+       <script type="text/javascript" src="${request.route_url('viewer')}"></script>
+     by:
+       <script type="text/javascript" src="${request.route_url('viewer')}${extra_params}"></script>
+
+   - In wsgi.conf.in, add a new RewriteRule:
+     RewriteRule ^${vars:apache-entry-point}theme/(.+)$ /${vars:instanceid}/wsgi/theme/$1 [PT]
+
+3. To add the support of WMTS layers the database should be updated by
+   standard procedure, CGXP also. We also need the ogcproxy, and to
+   use is we need to add the following line in the file
+   <project>/templates/viewer.js:
+
+        OpenLayers.ProxyHost = "${request.route_url('ogcproxy')}?url=";
+
+4. CGXP helper tools
+
+   Some javascript helpers have been added to cgxp, allowing to open internal
+   message or external html into an Ext Windows popup.
+
+   The following modification is needed:
+
+   - add "CGXP/tools/tools.js" to the 'include' list in the '[app.js]' section of
+     the 'jsbuild/app.cfg' file
+
+   If your project already used this Ext Windows popup system but with the
+   functions called from the viewer.js with the app. namespace, you can remove
+   the function from that template but you need to replace the "app." by
+   "cgxp.tools." in all the javascript calls, ie:
+   <a href="javascript:app.openInfoWindow('http://www.test.com', 'Popup title', 600, 500);">Link text</a>
+   become
+   <a href="javascript:cgxp.tools.openInfoWindow('http://www.test.com', 'Popup title', 600, 500);">Link text</a>
+
+5. Add new deploy hooks to set the databases rights.
+   cd c2cgp_minimal
+   ./buildout/bin/pcreate --overwrite -s c2cgeoportal_create /tmp/c2cgp_minimal package=c2cgp_minimal
+   cp /tmp/c2cgp_minimal/deploy/hooks/post-restore-database.in deploy/hooks/
+   chmod +x deploy/hooks/post-restore-database.in
+   rm -rf /tmp/c2cgp_minimal
+
+6. HTTPS detection
+
+   If your application is accessed in HTTPS but is behind some proxies that remove the SSL encryption,
+   you can make sure that all generated URLs (CSS and Javascript files, images, MapServer requests, etc.)
+   use the HTTPS scheme by specifing to c2cgeoportal an HTTP header to test for some value. For instance:
+   - In config.yaml.in:
+       https_flag_header: X_HTTPS
+       https_flag_value: 'on'
+
+7. New raster and profile web services are now available and require some configuration.
+    For the configuration of these web services read the documentation at
+    'administrator/raster'.
+
+8. Mobile application
+
+   Version 1.0 of c2cgeoportal includes a mobile application template/scaffold.
+
+   To add a mobile application to an existing project you need to copy two
+   files from the c2cgeoportal_create scaffold, and add routes and views to the
+   project configuration. See below.
+
+   Copy config.js and mobile.cfg from c2cgeoportal_create:
+
+   $ cd c2cgp_minimal
+   $ ./buildout/bin/pcreate -s c2cgeoportal_create \
+           /tmp/c2cgp_minimal package=c2cgp_minimal
+   $ cp /tmp/c2cgp_minimal/c2cgp_minimal/static/mobile/config.js \
+        c2cgp_minimal/static/mobile/
+   $ cp /tmp/c2cgp_minimal/jsbuild/mobile.cfg jsbuild/
+   $ rm -rf /tmp/c2cgp_minimal
+
+   Add routes and views:
+
+   # mobile views and routes
+   config.add_route('mobile_index_dev', '/mobile_dev/')
+   config.add_view('c2cgeoportal.views.mobile.index',
+                   renderer='c2cgp_minimal:static/mobile/index.html',
+                   route_name='mobile_index_dev')
+   config.add_route('mobile_config_dev', '/mobile_dev/config.js')
+   config.add_view('c2cgeoportal.views.mobile.config',
+                   renderer='c2cgp_minimal:static/mobile/config.js',
+                   route_name='mobile_config_dev')
+   config.add_static_view('mobile_dev', 'c2cgp_minimal:static/mobile')
+
+   config.add_route('mobile_index_prod', '/mobile/')
+   config.add_view('c2cgeoportal.views.mobile.index',
+                   renderer='c2cgp_minimal:static/mobile/build/production/index.html',
+                   route_name='mobile_index_prod')
+   config.add_route('mobile_config_prod', '/mobile/config.js')
+   config.add_view('c2cgeoportal.views.mobile.config',
+                   renderer='c2cgp_minimal:static/mobile/build/production/config.js',
+                   route_name='mobile_config_prod')
+   config.add_static_view('mobile', 'c2cgp_minimal:static/mobile/build/production')
+
+   Now read http://docs.camptocamp.net/c2cgeoportal/integrator/mobile.html to
+   know how to build and customize the mobile application.
+
+9. GeoExt popup css resource in template for debug mode was missing
+   - add:
+     <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/lib/cgxp/geoext/resources/css/popup.css')}" />
+     in file <project>/templates/index.html
+
+10. In the CGXP print plugin config autoFit: true should be set in the "options"
+   object instead of the "outputConfig" object.
+
+   Change from:
+
+        {
+            ptype: "cgxp_print",
+            legendPanelId: "legendPanel",
+            featureGridId: "featureGrid",
+            outputTarget: "left-panel",
+            printURL: "${request.route_url('printproxy', path='')}",
+            mapserverURL: "${request.route_url('mapserverproxy', path='')}",
+            options: {
+                labelAlign: 'top',
+                defaults: {
+                    anchor:'100%'
+                }
+            },
+            outputConfig: {
+                autoFit: true
+            }
+        },
+
+    to:
+
+        {
+            ptype: "cgxp_print",
+            legendPanelId: "legendPanel",
+            featureGridId: "featureGrid",
+            outputTarget: "left-panel",
+            printURL: "${request.route_url('printproxy', path='')}",
+            mapserverURL: "${request.route_url('mapserverproxy', path='')}",
+            options: {
+                labelAlign: 'top',
+                defaults: {
+                    anchor:'100%'
+                },
+                autoFit: true
+            }
+        },
+
+11. IE9 slider issue doesn't require a compatible meta anymore.
+
+    Remove the following meta from the index.html template:
+
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+
+    And add the following lines to the jsbuild/app.cfg file:
+
+    - in the root section:
+        c2cgp_minimal/static/lib/cgxp/ext.overrides
+
+    - in the include section:
+        DragTracker.js #ext.override
+
+12. Add the following line to the root section of the app.js section in jsbuild/app.cfg:
+
+    c2cgp_minimal/static/lib/cgxp/dygraphs
+
+    Also add the following line in the index.html template:
+
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9">
+
+13. The "featureGridId" parameter has been renamed to "featureProvider" in the
+    print config.
+
+14. In case you're using the cgxp_querier plugin, you need to replace the
+    "featureType" config option by "featureTypes" which is now an array:
+
+    - featureType: 'the_layer',
+    + featureTypes: ['the_layer'],
+
+15. Update the print. A new file is required. To get it do the following:
+
+    ./buildout/bin/pcreate -s c2cgeoportal_create /tmp/c2cgp_minimal package=c2cgp_minimal
+    cp /tmp/c2cgp_minimal/print/WEB-INF/classes/spring-application-context.xml \
+            print/WEB-INF/classes
+    git add print/WEB-INF/classes/spring-application-context.xml
+    rm -rf /tmp/c2cgp_minimal
+
+16. The cgxp-install part is now deactivated by default, so if you still use
+    SVN, you have to add it back in your ``buildout.cfg`` file, section
+    ``[buildout]``. Since this part needs to be run before jsbuild and cssbuild,
+    you have to override the whole parts list. For instance:
+
+        parts = eggs
+                activate
+                template
+                modwsgi
+                cgxp-install
+                jsbuild
+                cssbuild
+                po2mo
+                print-template
+                print-war
+
+    If you are on Git the this line isn't needed any more in
+    your ``buildout.cfg`` file, section ``[buildout]``:
+
+        parts -= cgxp-install
+
+17. It is recommended to edit the project's ``development.ini.in`` and
+    ``production.ini.in`` files and change ``[app:c2cgp_minimal]`` to
+    ``[app:app]``, and in the section ``[pipeline:main]`` replace
+    ``pipeline = weberror fanstatic c2cgp_minimal`` by
+    ``pipeline = weberror fanstatic app``. In this way the ``manage_db``
+    and ``manage_users`` commands can be used without specifying any
+    application name using the ``--app-name`` switch - "app" is the default.
+    This change is recommended, but optional.
+
+    You should also modify your create_db script like this commit:
+        https://github.com/camptocamp/c2cgeoportal/commit/8ae339c526719de953027beb72f5e1b649a93780
+
+18. Add the FUNCTIONALITY var in viewer.js and use it in the map
+    opacity slider config.
+
+        var FUNCTIONALITY = ${functionality | n};
+
+    and
+
+        {
+            ptype: "cgxp_mapopacityslider",
+            defaultBaseLayerRef: FUNCTIONALITY.default_basemap[0]
+        }
+
+    Make sure there's a default_basemap set. default_basemap should probably
+    be set for anonymous users in config.yaml.in:
+
+        functionalities:
+            anonymous:
+                print_template:
+                - 1 A4 portrait
+                - 2 A3 landscape
+                default_basemap: plan
+
+19. The file 'deploy/hooks/post-restore-code' is unneeded, it should be removed.
+
+20. In the file '.gitignore' the following lines should be added:
+    *.pyc
+    deploy/hooks/post-restore-database
+    c2cgp_minimal/static/mobile/resources/sass/.sass-cache
+    c2cgp_minimal/static/mobile/archive/
+    c2cgp_minimal/static/mobile/build/
+    c2cgp_minimal/static/mobile/openlayers-mobile.js
+
+21. Improve the checker an add a check collector, see integator/check in the
+    documentation to configure them.
+    Something like this can be removed in the <project>/__init__.py
+    config.add_settings({'check_print_template': '1 A4 portrait'})
+    config.add_settings({'check_FullTextSearch': 'te'})
+
+
+Version 0.7
+===========
+
+1. The "pserve" command should now be used instead of "paster serve".
+
+   For "pserve" to work a few simple modifications are required in
+   development.ini.in, production.ini.in, print/config.yaml.in and
+   print/templates/print.mako.in.
+
+   - In development.ini.in and production.ini.in and replace "use
+     = egg:Paste#http" by "use = egg:waitress#main".
+
+   - In development.ini.in, production.ini.in, print/config.yaml.in, and
+     print/templates/print.mako.in replace "${vars:paster_port}" by
+     "${vars:waitress_port}".
+
+   And to be able to use "pserve" you need to add "waitress" to
+   the "install_requires" list defined in the application's
+   "setup.py" file. For example:
+
+   install_requires=[
+       'c2cgeoportal',
+       'configobj',
+       'pyramid_debugtoolbar',
+       'waitress'
+   ],
+
+2. Display directly the loading panel introduce those needed changes:
+    * In the +package+/templates/viewer.js includes all the code in:
+        Ext.onReady(function() {
+            // all the code
+        });
+    * In the +package+/templates/index.html do this replacement:
+      -        <script type="text/javascript">
+      -            Ext.onReady(function() {
+      -                <%include file="viewer.js" />
+      -            });
+      -        </script>
+      +        <script type="text/javascript" src="${request.route_url('viewer')}"></script>
+    * Do the same for the edit.js/edit.html
+
+3. If missing, add a MIME type to the "jpeg" OUTPUTFORMAT section
+   in mapserver/c2cgeoportal.map.in:
+   MIMETYPE "image/jpeg"
+
+4. Mapfile performance tips:
+    * To get lighter PNG outputs, use the following outputformat:
+      OUTPUTFORMAT
+          NAME png
+          DRIVER AGG/PNG
+          MIMETYPE "image/png"
+          IMAGEMODE RGBA
+          EXTENSION "png"
+          FORMATOPTION "INTERLACE=OFF"
+          FORMATOPTION "QUANTIZE_DITHER=OFF"
+          FORMATOPTION "QUANTIZE_FORCE=ON"
+          FORMATOPTION "QUANTIZE_COLORS=256"
+      END
+    * For PostGIS layers, make sure to use:
+      PROCESSING "CLOSE_CONNECTION=DEFER"
+
+
+Version 0.6
+===========
+
+Editing Interface
+-----------------
+
+c2cgeoportal 0.6 features an editing interface. To make the editing interface
+work in an existing project several steps are required:
+
+1. The editing interface relies on the CGXP Editing plugin. This plugin is
+   available as of commit 58c931d [1] of CGXP. So CGXP should be updated to, at
+   least, this commit in the application. See [2] to know how to update CGXP.
+
+   [1] <https://github.com/camptocamp/cgxp/commit/58c931de2f6397ffba223b4305d0b10a18413032>
+   [2] <http://docs.camptocamp.net/c2cgeoportal/integrator/update_application.html#update-cgxp>
+
+2. An [edit.js] section should be added to jsbuild/app.cfg (notice the CHANGE
+   ME IF NEEDED comment):
+
+   [edit.js]
+   root =
+       c2cgp_minimal/static/lib/cgxp/core/src/script
+       c2cgp_minimal/static/lib/cgxp/ext
+       c2cgp_minimal/static/lib/cgxp/geoext/lib
+       c2cgp_minimal/static/lib/cgxp/openlayers/lib
+       c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthControl/lib
+       c2cgp_minimal/static/lib/cgxp/openlayers.addins/Spherical/lib
+       c2cgp_minimal/static/lib/cgxp/gxp/src/script
+       c2cgp_minimal/static/lib/cgxp/proj4js
+       c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/Measure/lib
+       c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/SimplePrint/lib
+       c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureEditing/lib
+       c2cgp_minimal/static/lib/cgxp/sandbox
+       c2cgp_minimal/static/lib/cgxp/styler/lib
+       c2cgp_minimal/static/lib/cgxp/ext.ux/TwinTriggerComboBox
+       c2cgp_minimal/static/lib/cgxp/ext.ux/ColorPicker
+       c2cgp_minimal/static/lib/cgxp/ext.ux/base64
+       c2cgp_minimal/static/js
+   first =
+       Ext/adapter/ext/ext-base.js
+       Ext/ext-all.js
+       OpenLayers/SingleFile.js
+       OpenLayers/Console.js
+       OpenLayers/BaseTypes.js
+       OpenLayers/BaseTypes/Class.js
+       OpenLayers/BaseTypes/Pixel.js
+       OpenLayers/BaseTypes/Bounds.js
+       OpenLayers/BaseTypes/LonLat.js
+       OpenLayers/BaseTypes/Element.js
+       OpenLayers/BaseTypes/Size.js
+       OpenLayers/Util.js
+       OpenLayers/Lang.js
+       proj4js/lib/proj4js.js
+   exclude =
+       GeoExt.js
+       GeoExt/SingleFile.js
+   include =
+       EPSG21781.js #proj4js (CHANGE ME IF NEEDED)
+       util.js #GXP
+       widgets/Viewer.js #GXP
+       CGXP/plugins/Editing.js
+       CGXP/plugins/Login.js
+       CGXP/plugins/ThemeSelector.js
+       CGXP/plugins/LayerTree.js
+       CGXP/plugins/MenuShortcut.js
+       CGXP/widgets/MapPanel.js
+       OpenLayers/Control/Navigation.js
+       OpenLayers/Control/KeyboardDefaults.js
+       OpenLayers/Control/PanZoomBar.js
+       OpenLayers/Control/ArgParser.js
+       OpenLayers/Control/Attribution.js
+       OpenLayers/Control/ScaleLine.js
+       OpenLayers/Control/MousePosition.js
+       OpenLayers/Control/OverviewMap.js
+       OpenLayers/Control/NavigationHistory.js
+       OpenLayers/Layer/Vector.js
+       OpenLayers/Renderer/SVG.js
+       OpenLayers/Renderer/VML.js
+
+3. Optionally you can add the line
+   c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureEditing/lib to the "root"
+   list of every [*.js] section of jsbuild/app.cfg. This is optional because
+   only the editing interface (edit.js) should require scripts from this
+   directory. But it may be a good idea to have every [*.js] section use the
+   same "root" list.
+
+4. You need to add two Mako templates to c2cgp_minimal/templates, namely edit.html
+   and edit.js. These files are in the c2cgeoportal_create paster template, so
+   they're not automatically added to the application source tree when the
+   c2cgeoportal_update template is applied. The easiest way to get them is to
+   apply the c2cgeoportal_create directory outside the existing application,
+   and copy the files from the newly created directory to the application:
+
+   cd c2cgp_minimal
+   ./buildout/bin/paster create --template c2cgeoportal_create \
+       --output-dir=/tmp/c2cgp_minimal package=c2cgp_minimal
+   cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/edit.html c2cgp_minimal/templates/
+   cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/edit.js c2cgp_minimal/templates/
+   rm -rf /tmp/c2cgp_minimal
+
+5. SQL queries in the DATA properties should be changed in the mapfile for the
+   editable layers. They should use the new "mapfile_data_subselect" Buildout
+   variable. See the administrator mapfile documentation.
+
+6. Papyrus 0.9 is required. See below.
+
+7. GeoAlchemy 0.7 is required. See below.
+
+
+Other changes
+-------------
+
+1. c2cgeoportal 0.6 requires Papyrus 0.9, so the version of Papyrus should be
+   set to 0.9 on the buildout configuration of the c2cgeoportal project
+   (section [versions]).
+
+2. c2cgeoportal 0.6 requires GeoAlchemy 0.7. So GeoAlchemy should be set to
+   0.7 in the project's buildout configuration.
+
+3. In production.ini.in and development.ini.in jsbuild_root_dir should now be
+   set to ${buildout:directory}:
+
+   jsbuild_root_dir = ${buildout:directory}
+
+4. To be able to use the AddKMLFile CGXP plugin (cgxp_addkmlfile) the directory
+   c2cgp_minimal/static/lib/cgxp/ext.ux/base64 should be a "root" in each [*.js]
+   section of jsbuild/app.cfg. Example:
+
+    [app.js]
+    root =
+        c2cgp_minimal/static/lib/cgxp/core/src/script
+        c2cgp_minimal/static/lib/cgxp/ext
+        c2cgp_minimal/static/lib/cgxp/geoext/lib
+        c2cgp_minimal/static/lib/cgxp/openlayers/lib
+        c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthControl/lib
+        c2cgp_minimal/static/lib/cgxp/openlayers.addins/Spherical/lib
+        c2cgp_minimal/static/lib/cgxp/gxp/src/script
+        c2cgp_minimal/static/lib/cgxp/proj4js
+        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/Measure/lib
+        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/SimplePrint/lib
+        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureEditing/lib
+        c2cgp_minimal/static/lib/cgxp/sandbox
+        c2cgp_minimal/static/lib/cgxp/styler/lib
+        c2cgp_minimal/static/lib/cgxp/ext.ux/TwinTriggerComboBox
+        c2cgp_minimal/static/lib/cgxp/ext.ux/ColorPicker
+        c2cgp_minimal/static/lib/cgxp/ext.ux/base64
+        c2cgp_minimal/static/js
+
+5. To be able to install c2cgeoportal applications behind proxies with limited
+   access to the outside world we had to patch Distribute and Buildout. See
+   <https://github.com/camptocamp/c2cgeoportal/issues/62> for more details.
+
+   If your application is behind a proxy which can access pypi.camptocamp.net
+   only then it is required to use the patched versions of Distribute and
+   Buildout. If your application is not behind a proxy it is recommended.
+
+   To change to the patched versions of Distribute and Buildout follow these
+   steps:
+
+   - Edit CONST_buildout.cfg and verify that it has an allow-hosts option set
+     to pypi.camptocamp.net.
+
+   - Remove the Distribute and Buildout eggs from the buildout/eggs dir:
+
+     rm -rf buildout/eggs/distribute-0.6.14* buildout/eggs/zc.buildout-1.5.2*
+
+   - Run bootstrap.py with specific options to install the patched versions of
+     Buildout and Distribute:
+
+     python bootstrap.py --version 1.5.2 --distribute --download-base \
+       http://pypi.camptocamp.net/distribute-0.6.22_fix-issue-227/ --setup-source \
+       http://pypi.camptocamp.net/distribute-0.6.22_fix-issue-227/distribute_setup.py
+
+   - Run the usual buildout/bin/buildout command.
+
+6. In jsbuild/app.cfg, replace GoogleEarthControl by GoogleEarthView to
+   have the following entry:
+        c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthView/lib
+   And add the following entries to api.js, and all language files
+   (like en.js, fr.js, de.js, ...) to have all identical root:
+        c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthView/lib
+        c2cgp_minimal/static/lib/cgxp/openlayers.addins/Spherical/lib
+
+7. Templates modifications:
+
+   The base templates are deprecated, to get the new version do
+   (Careful: this will overwrite your changes):
+       cd c2cgp_minimal
+       ./buildout/bin/paster create --template c2cgeoportal_create \
+           --output-dir=/tmp/c2cgp_minimal package=c2cgp_minimal
+       cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/apihelp.html c2cgp_minimal/templates/
+       cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/apiloader.html c2cgp_minimal/templates/
+       cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/apiviewer.html c2cgp_minimal/templates/
+       cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/index.html c2cgp_minimal/templates/
+       cp /tmp/c2cgp_minimal/c2cgp_minimal/templates/viewer.js c2cgp_minimal/templates/
+       rm -rf /tmp/c2cgp_minimal
+
+   Notes:
+
+      * The viewer layout has changed to ease the integration of the Google Earth plugin.
+      * A null value for the user's map extent is now permitted.
+      * The jsextent property of role is renamed to json_extent.
+
+8. Other changes to jsbuild/app.cfg are recommended. They are even required if
+   you added an edit.js section as indicated in the "Editing Interface" section
+   above. Your application's jsbuild/app.cfg most probably adds
+   language-related files into app.js and api.js, which it should not. The only
+   language-related file that should be included in app.js, edit.js and api.js
+   is OpenLayers/Lang.js. The other language-related files should go in the
+   lang-*.js builds.  See this diff
+   https://github.com/camptocamp/c2cgeoportal/pull/105/files and
+   https://github.com/camptocamp/c2cgeoportal/pull/166/files to see how app.cfg
+   was changed in the create template, that should help you fix your
+   application's app.cfg. The note explaining why OpenLayers/Lang.js should be
+   included in the main build may be of interest.
+
+
+Version 0.5 (and before)
+========================
+
+-------------------------------
+Mon, 27 Feb 2012 14:15:14 +0100
+
+We have release JSTools 0.6 on pypi.python.org. This version includes bug
+fixes, for Windows in particular. c2cgeoportal 0.5 requires JSTools 0.6, so the
+version of JSTools should be set to 0.6 in the buildout configuration of
+c2cgeoportal projects (section [versions]).
+
+-------------------------------
+Tue, 31 Jan 2012 13:59:45 +0100
+
+Because OpenLayers has been upgraded, one must replace
+OpenLayers/Layer/XYZ.js
+by
+OpenLayers/Layer/OSM.js
+in the [app.js] "include" section of jsbuild/app.cfg.
+
+-------------------------------
+Tue, 31 Jan 2012 14:41:44 +0100
+
+In the <package>/template/viewer.js file, in the block 'viewer_layers'
+remove the last comma for IE, see commit 11d373b.
+
+-------------------------------
+Thu, 26 Jan 2012 13:21:20 +0100
+
+Not required but recommended: you can edit your project's development.ini.in
+and production.ini.in files and remove the [app:c2cgeoportal] section and its
+content (one line). This section was needed for c2cgeoportal's manage_db and
+create_db scripts to know the project package name, but it's not needed
+anymore. For example, the manage_db script now has --app-name and --app-config
+options.
+
+-------------------------------
+
+Thu, 12 Jan 2012 13:35:23 +0100
+
+Due to wrong moving the files in 'print/print'. If exists the folder
+'print/print/WEB-INF/' should be moved to 'print/WEB-INF/' and the
+folder 'print/print/' should be removed.
+
+-------------------------------
+
+Wed, 14 Dec 2011 17:49:36 +0100
+
+This migration concerns the changes reorganizing the "create" and "update"
+paste templates.
+
+* update the version of c2cgeoportal requirement in the project setup.py
+so that c2cgeoportal dependency version is == 0.3.2. You should have:
+    install_requires=[
+        'PasteScript',
+        'c2cgeoportal==0.3.2',
+    ],
+Then launch buildout to retrieve this new version of the egg c2cgeoportal.
+
+* apply the 'update' template
+
+* the manage_db script is now handled by c2cgeoportal again (this revert
+the change introduced in c2cgeoportal v0.3.1):
+  * update console_scripts entry points in the project setup.py, you should
+  now have:
+       'console_scripts': [
+           'create_db = <package_name>.scripts.create_db:main',
+       ],
+  * remove the script manage_db from the project:
+    $$ svn rm <package_name>/scripts/CONST_manage_db.py
+
+* rename the following files:
+    $$ svn mv apache/CONST_frontend.conf.in apache/frontend.conf.in
+    $$ svn mv apache/CONST_mapserver.conf.in apache/mapserver.conf.in
+    $$ svn mv apache/CONST_README.txt.in apache/README.txt.in
+    $$ svn mv apache/CONST_tilecache.conf.in apache/tilecache.conf.in
+    $$ svn mv apache/CONST_wsgi.conf.in apache/wsgi.conf.in
+    $$ svn mv CONST_development.ini.in development.ini.in
+    $$ svn mv CONST_production.ini.in production.ini.in
+These files used to be generated by the update template, they're now generated
+by the create template, this is why the CONST_ prefix is removed.
+You can also update the svn:ignore property appropriately.
+
+* add a .httpauth file in the project directory (if not already existing),
+which contains the required credentials to access to our pypi internal server.
+This file is generated when the 'create' template is applied so you have to
+create it by hand.
+This file should contain the following line:
+    "C2C internal pypi server, http://pypi.camptocamp.net/internal-pypi, <login>, <password>"
+(where <login> and <password> are to be replaced by the the Camptocamp internal
+pypi server login/password)
+
+-------------------------------
+
+Wed, 14 Dec 2011 17:17:56 +0100
+
+The files jsbuild/CONST_app.cfg and jsbuild/app.cfg should be merged together.
+Finally jsbuild/CONST_app.cfg should be removed and all jsbuild configuration
+should sit in jsbuild/app.cfg.
+
+-------------------------------
+
+/!\ ATTENTION:
+Note that you cannot upgrade to c2cgeoportal version >= 0.3.2 directly.
+You have to upgrade to v0.3.1 first, see below.
+
+-------------------------------
+
+VERSION 0.3.1
+
+Thu, 08 Dec 2011 10:00:00 +0100
+
+This migration concerns the changes about distributing c2cgeoportal as an egg.
+
+Once project is up to date (svn update) and the 'update' template has been
+applied, the project should also be updated in the following ways:
+
+* remove svn:externals to c2cgeoportal and rm -rf c2cgeoportal directory
+
+* update console_scripts entry points in the project setup.py so that script
+manage_db now refers to <package_name>.scripts.CONST_manage_db:main. You should
+have:
+       'console_scripts': [
+           'create_db = <package_name>.scripts.create_db:main',
+           'manage_db = <package_name>.scripts.CONST_manage_db:main',
+       ],
+
+* update the version of c2cgeoportal requirement in the project setup.py
+so that c2cgeoportal dependency version is == 0.3.1. You should have:
+    install_requires=[
+        'PasteScript',
+        'c2cgeoportal==0.3.1',
+    ],
+
+* add a migrate.cfg file in
+MyProject/myproject/CONST_migration/migrate.cfg
+This migrate.cfg file is generated when the 'create' template is applied so
+you have to create it by hand. The version_table parameter value should
+be set to "version_<package_name>".
+
+The content of the migrate.cfg file should look like this:
+
+    [db_settings]
+    # Used to identify which repository this database is versioned under.
+    # You can use the name of your project.
+    repository_id=c2cgeoportal
+
+    # The name of the database table used to track the schema version.
+    # This name shouldn't already be used by your project.
+    # If this is changed once a database is under version control, you'll need to
+    # change the table name in each database too.
+    version_table=version_<package_name>
+
+    # When committing a change script, Migrate will attempt to generate the
+    # sql for all supported databases; normally, if one of them fails - probably
+    # because you don't have that database installed - it is ignored and the
+    # commit continues, perhaps ending successfully.
+    # Databases in this list MUST compile successfully during a commit, or the
+    # entire commit will fail. List the databases your application will actually
+    # be using to ensure your updates to that database work properly.
+    # This must be a list; example: ['postgres','sqlite']
+    required_dbs=[]
+
+* rename the version table to match the name set in the version_table
+parameter:
+    ALTER TABLE <old_name> RENAME TO version_<package_name>
+with <old_name> replaced by the old name of the version table which is
+certainly the application's db schema name.
+
+-------------------------------
+
+Wed, 14 Dec 2011 17:00:24 +0100
+
+Implements group restriction to acces to the admin interface.
+
+To continue to acces to the admin interface you should, in the file
+'<project>/__init__.py' replaxe the line
+-     authentication_policy = AuthTktAuthenticationPolicy(settings.get('authtkt_secret'))
+by:
++     authentication_policy = AuthTktAuthenticationPolicy(settings.get('authtkt_secret'),
++            callback=defaultgroupsfinder)
+and add the import:
++ from c2cgeoportal.resources import defaultgroupsfinder.
+
+-------------------------------
+
+Wed, 07 Dec 2011 15:10:57 +0100
+
+Replace the CONST_README.txt by the documentation.
+Add a CONST_TIP.txt to have some usefull commands.
+Than you can do to remove the old CONST_README.txt
+$$ svn rm CONST_README.txt.in
+
+-------------------------------
+
+Mon, 28 Nov 2011 17:43:25 +0100
+
+Added apiloader.js in the project templates directory.
+
+-------------------------------
+
+Mon, 28 Nov 2011 16:13:41 +0100
+
+Added missing encoder in the mapfile. In MAP/WEB/METADATA added:
+    "wfs_encoding" "UTF-8"
+
+-------------------------------
+
+Mon, 28 Nov 2011 14:51:37 +0100
+
+CGXP mode from SVN to GIT(hub).
+Now we use a buildout task to do the clone.
+
+To update your project do:
+$$ svn propdel svn:externals c2cgp_minimal/static/lib/
+$$ rm -rf c2cgp_minimal/static/lib/cgxp
+$$ svn propset svn:ignore cgxp c2cgp_minimal/static/lib/
+
+-------------------------------
+
+Mon, 28 Nov 2011 11:42:25 +0100
+
+Added WFSGetFeature to query feature in a BBOX but desable by default.
+-------------------------------
+
+Mon, 21 Nov 2011 12:58:23 +0100
+
+Added a disclaimer cgxp plugin
+
+Added CGXP/plugins/Disclaimer.js to jsbuild/app.cfg so that the Disclaimer
+plugin can be used.
+Note that the database should also be updated for the disclaimer plugin to
+work correctly.
+-------------------------------
+
+Thu, 17 Nov 2011 11:24:25 +0100
+
+Added block tools_additional in viewer_base.js
+-------------------------------
+
+Wed, 16 Nov 2011 16:11:54 +0100
+
+Fixed gettext config in order to take into account translations from the project templates
+-------------------------------
+
+Wed, 09 Nov 2011 17:15:13 +0100
+
+Extended GeoExt.MapPanel to override the getState method
+
+Add CGXP/widgets/MapPanel.js in app.cfg
+-------------------------------
+
+Mon, 07 Nov 2011 10:05:22 +0100
+
+Added a colorpicker to the redlining tool.
+
+In the jsbuild/app.cfg, CGXP/plugins/Redlining.js should be replaced by
+CGXP/widgets/RedliningColorPicker.js for the new colorpicker or by
+CGXP/widgets/RedliningCombo.js to have the old combobox.
+

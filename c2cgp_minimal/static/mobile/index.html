@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html lang="${lang}">
+<head>
+    <meta charset="UTF-8">
+    <title>c2cgp_minimal Mobile Application</title>
+    <style type="text/css">
+        /**
+         * This file is managed by the update scaffold then
+         * the project CSS should be in the `custom.scss` file.
+         *
+         * It is recommended to keep this as minimal as possible to provide instant feedback
+         * while other resources are still being loaded for the first time
+         */
+        html, body {
+            height: 100%;
+            background-color: #1985D0
+        }
+
+        #appLoadingIndicator {
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            text-align: center;
+            width: 100%;
+            height: 30px;
+            -webkit-animation-name: appLoadingIndicator;
+            -webkit-animation-duration: 0.5s;
+            -webkit-animation-iteration-count: infinite;
+            -webkit-animation-direction: linear;
+        }
+
+        #appLoadingIndicator > * {
+            background-color: #FFFFFF;
+            display: inline-block;
+            height: 30px;
+            -webkit-border-radius: 15px;
+            margin: 0 5px;
+            width: 30px;
+            opacity: 0.8;
+        }
+
+        @-webkit-keyframes appLoadingIndicator{
+            0% {
+                opacity: 0.8
+            }
+            50% {
+                opacity: 0
+            }
+            100% {
+                opacity: 0.8
+            }
+        }
+    </style>
+<%
+    import urllib
+    query_params = dict(request.params)
+    query_string = urllib.urlencode(query_params)
+    came_from = request.current_route_url(_query=query_params)
+%>
+<%doc>
+    Be careful, the Sencha Touch build tool will fail if the script tag
+    includes text that is not JavaScript. For example you cannot include
+    Mako control structures (%if %endif etc.), nor can you do things like
+    App.foo = ${bar} (without quotes around ${bar}). The script tag
+    must include parseable JavaScript code. Period.
+</%doc>
+    <script type="text/javascript">
+        var App = {};
+        App.searchUrl = "${request.route_url('fulltextsearch', path='')}";
+        App.wmsUrl = "${request.route_url('mapserverproxy', path='')}";
+        App.rasterUrl = "${request.route_url('raster', path='')}";
+        App.loginUrl = "${request.route_url('login', _query={'came_from': came_from})}";
+        App.logoutUrl = "${request.route_url('logout', _query={'came_from': came_from})}";
+        App.desktopAppUrl = "${request.route_url('home', path='', _query={'no_redirect':''})}";
+    </script>
+    <script type="text/javascript" src="openlayers-mobile.js"></script>
+    <script type="text/javascript" src="config.js?${query_string}"></script>
+    <!-- The line below must be kept intact for Sencha Command to build your application -->
+    <script id="microloader" type="text/javascript" src="sdk/microloader/development.js"></script>
+    ${'<script>Ext.Loader.setConfig({disableCaching: false}); </script>' if request.path_info == '/mobile_dev/' else '' | n}
+</head>
+<body>
+    <div id="appLoadingIndicator">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</body>
+</html>

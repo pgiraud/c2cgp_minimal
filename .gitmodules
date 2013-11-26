@@ -1,0 +1,3 @@
+[submodule "c2cgp_minimal/static/lib/cgxp"]
+	path = c2cgp_minimal/static/lib/cgxp
+	url = https://github.com/camptocamp/cgxp.git
