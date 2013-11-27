@@ -19,7 +19,7 @@ Ext.onReady(function() {
     % else:
     var INITIAL_EXTENT = [600000.000000, 194000.000000, 604000.000000, 198000.000000];
     % endif
-    var RESTRICTED_EXTENT = [600000.000000, 194000.000000, 604000.000000, 198000.000000];
+    var RESTRICTED_EXTENT = [420000, 30000, 900000, 350000];
 
     // Themes definitions
     var THEMES = {
