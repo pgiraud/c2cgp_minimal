@@ -17,9 +17,9 @@ Ext.onReady(function() {
     % if json_extent:
     var INITIAL_EXTENT = ${json_extent};
     % else:
-    var INITIAL_EXTENT = [420000, 30000, 900000, 350000];
+    var INITIAL_EXTENT = [600000.000000, 194000.000000, 604000.000000, 198000.000000];
     % endif
-    var RESTRICTED_EXTENT = [420000, 30000, 900000, 350000];
+    var RESTRICTED_EXTENT = [600000.000000, 194000.000000, 604000.000000, 198000.000000];
 
     // Themes definitions
     var THEMES = {
@@ -177,10 +177,6 @@ Ext.onReady(function() {
             outputTarget: "featuresgrid-container",
             themes: THEMES,
             events: EVENTS
-        },
-        {
-            ptype: "cgxp_mapopacityslider",
-            defaultBaseLayerRef: "${functionality['default_basemap'][0] | n}"
         },
         {
             ptype: "gxp_zoomtoextent",
@@ -349,30 +345,6 @@ Ext.onReady(function() {
                 })
             ],
             layers: [{
-                source: "olsource",
-                type: "OpenLayers.Layer.WMTS",
-                args: [Ext.applyIf({
-                    name: OpenLayers.i18n('ortho'),
-                    mapserverLayers: 'ortho',
-                    ref: 'ortho',
-                    layer: 'ortho',
-                    formatSuffix: 'jpeg',
-                    opacity: 0
-                }, WMTS_OPTIONS)]
-            },
-            {
-                source: "olsource",
-                type: "OpenLayers.Layer.WMTS",
-                group: 'background',
-                args: [Ext.applyIf({
-                    name: OpenLayers.i18n('plan'),
-                    mapserverLayers: 'plan',
-                    ref: 'plan',
-                    layer: 'plan',
-                    group: 'background'
-                }, WMTS_OPTIONS)]
-            },
-            {
                 source: "olsource",
                 type: "OpenLayers.Layer",
                 group: 'background',
