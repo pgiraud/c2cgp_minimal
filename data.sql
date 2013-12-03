@@ -12317,6 +12317,7 @@ COPY layergroup (id, "isExpanded", "isInternalWMS", "isBaseLayer") FROM stdin;
 COPY layergroup_treeitem (treegroup_id, treeitem_id) FROM stdin;
 2	1
 4	3
+4	1
 \.
 
 
