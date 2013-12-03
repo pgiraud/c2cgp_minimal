@@ -155,6 +155,14 @@ MAP
             "wms_title" "Com_Boundary" # For WMS
             "wms_srs" "epsg:21781" # For WMS
 
+            "gml_include_items" "all"
+            "gml_types" "auto"
+            "gml_featureid" "gid"
+            "wfs_enable_request" "*"
+
+            "gml_geometries" "the_geom"
+            "gml_geom_type" "polygon"
+
             "wms_metadataurl_href" "http://www.example.com/bar" # For metadata URL
             "wms_metadataurl_format" "text/html" # For metadata URL
             "wms_metadataurl_type" "TC211" # For metadata URL
@@ -190,6 +198,14 @@ MAP
         METADATA
             "wms_title" "buildings" # For WMS
             "wms_srs" "epsg:21781" # For WMS
+
+            "gml_include_items" "all"
+            "gml_types" "auto"
+            "gml_featureid" "gid"
+            "wfs_enable_request" "*"
+
+            "gml_geometries" "the_geom"
+            "gml_geom_type" "polygon"
 
             "wms_metadataurl_href" "http://www.example.com/bar" # For metadata URL
             "wms_metadataurl_format" "text/html" # For metadata URL
