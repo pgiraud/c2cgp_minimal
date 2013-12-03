@@ -17,11 +17,31 @@ App.themes = '${themes | n}';
 
 App.WFSTypes = '${wfs_types | n}';
 
+var wmtsLayerOptions = {
+    url: [
+        'http://tile1-sitn.ne.ch/mapproxy/wmts',
+        'http://tile2-sitn.ne.ch/mapproxy/wmts',
+        'http://tile3-sitn.ne.ch/mapproxy/wmts',
+        'http://tile4-sitn.ne.ch/mapproxy/wmts',
+        'http://tile5-sitn.ne.ch/mapproxy/wmts'
+    ],
+    matrixSet: 'swiss_grid_new',
+    style: 'default',
+    requestEncoding: 'REST',
+    maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 360000),
+    transitionEffect: 'resize'
+};
 // define the map and layers
 App.map = new OpenLayers.Map({
-    fallThrough: true, // required for longpress queries
+    fallThrough: true,
     theme: null,
-    projection: 'EPSG:3857',
+    maxExtent: new OpenLayers.Bounds(600000.000000, 194000.000000, 604000.000000, 198000.000000),
+    //maxExtent: new OpenLayers.Bounds(515000, 180000, 580000, 230000),
+    projection: new OpenLayers.Projection("EPSG:21781"),
+    units: "m",
+    resolutions: [250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.125,0.0625],
+    center: new OpenLayers.LonLat(549600.0, 206050.0),
+    zoom: 1,
     controls: [
         new OpenLayers.Control.TouchNavigation({
             dragPanOptions: {
@@ -33,31 +53,10 @@ App.map = new OpenLayers.Map({
         new OpenLayers.Control.ScaleLine({geodesic: true})
     ],
     layers: [
-        new OpenLayers.Layer.OSM("OpenStreetMap", null, {
-            transitionEffect: 'resize'
-        }),
-        new OpenLayers.Layer.OSM(
-            "Cycle Map",
-            [
-                "http://a.tile.opencyclemap.org/cycle/${'${z}/${x}/${y}'}.png",
-                "http://b.tile.opencyclemap.org/cycle/${'${z}/${x}/${y}'}.png",
-                "http://c.tile.opencyclemap.org/cycle/${'${z}/${x}/${y}'}.png"
-            ],
-            {
-                transitionEffect: 'resize'
-            }
-        ),
-        new OpenLayers.Layer.OSM(
-            "Transport Map",
-            [
-                "http://a.tile2.opencyclemap.org/transport/${'${z}/${x}/${y}'}.png",
-                "http://b.tile2.opencyclemap.org/transport/${'${z}/${x}/${y}'}.png",
-                "http://c.tile2.opencyclemap.org/transport/${'${z}/${x}/${y'}}.png"
-            ],
-            {
-                transitionEffect: 'resize'
-            }
-
-        )
+        new OpenLayers.Layer.WMTS(OpenLayers.Util.extend({
+            name: 'OpenStreetMap',
+            layer: 'osm',
+            format: 'image/png',
+        }, wmtsLayerOptions))
     ]
 });

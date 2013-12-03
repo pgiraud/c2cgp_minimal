@@ -12387,8 +12387,8 @@ SELECT pg_catalog.setval('shorturl_id_seq', 1, false);
 --
 
 COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
-2	\N	f	t
-4	\N	f	t
+2	\N	t	t
+4	\N	t	t
 \.
 
 
