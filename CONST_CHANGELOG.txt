@@ -239,7 +239,7 @@ Version 1.4
 
   * In `c2cgp_minimal/templates/viewer.js`, `c2cgp_minimal/templates/api/mapconfig.js`,
     `c2cgp_minimal/templates/edit.js` replace
-    `url: '${tilecache_url}',` by `url: ${tiles_url},` (no quotes).
+    `url: '${tilecache_url}',` by `url: ${tiles_url | n},` (no quotes).
 
   * Change the `X-UA-Compatible` meta in the HTML templates, and other little
     things to do: in `c2cgp_minimal/templates/index.html`:
@@ -540,6 +540,7 @@ Version 1.4
          c2cgp_minimal/static/lib/cgxp/openlayers/lib
          c2cgp_minimal/static/lib/cgxp/proj4js
     +    c2cgp_minimal/static/js
+    +    c2cgp_minimal/static/mobile
      first =
          OpenLayers/SingleFile.js
          OpenLayers/Console.js

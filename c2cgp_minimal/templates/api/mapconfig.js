@@ -4,7 +4,7 @@ Extended APIs.
 </%doc>
 
         var WMTS_OPTIONS = {
-            url: '${tiles_url}',
+            url: ${tiles_url | n},
             displayInLayerSwitcher: false,
             requestEncoding: 'REST',
             buffer: 0,
