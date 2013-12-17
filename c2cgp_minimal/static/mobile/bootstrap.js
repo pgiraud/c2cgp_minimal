@@ -34,6 +34,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "App.view.Login": [],
   "App.view.LoginForm": [],
   "App.view.Main": [],
+  "App.view.Permalink": [],
   "App.view.Query": [],
   "App.view.Search": [],
   "App.view.Settings": [],
@@ -799,6 +800,9 @@ Ext.ClassManager.addNameAliasMappings({
   ],
   "App.view.Main": [
     "widget.mainview"
+  ],
+  "App.view.Permalink": [
+    "widget.map_permalink"
   ],
   "App.view.Query": [
     "widget.queryview"
