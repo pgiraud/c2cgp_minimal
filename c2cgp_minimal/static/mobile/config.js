@@ -40,8 +40,8 @@ App.map = new OpenLayers.Map({
     projection: new OpenLayers.Projection("EPSG:21781"),
     units: "m",
     resolutions: [250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.125,0.0625],
-    center: new OpenLayers.LonLat(549600.0, 206050.0),
-    zoom: 1,
+    center: new OpenLayers.LonLat(601950, 195690),
+    zoom: 4,
     controls: [
         new OpenLayers.Control.TouchNavigation({
             dragPanOptions: {
