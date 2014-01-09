@@ -466,6 +466,10 @@ Version 1.4
 
             find-links += http://pypi.camptocamp.net/internal-pypi/index/tileforge
 
+      - Now the mobile is built by default than remove the line:
+
+            parts += jsbuild-mobile mobile
+
 8. Update the print configuration:
 
   * In the print config template `print/templates/print.mako.in`
@@ -511,17 +515,6 @@ Version 1.4
             Sencha Cmd provides several categories [...]
 
         At Camptocamp we provide a Debian package for that.
-
-      - Sencha Touch 2.3.1 SDK needs to be downloaded::
-
-            $ cd /tmp/
-            $ wget http://cdn.sencha.io/touch/sencha-touch-2.3.1-gpl.zip
-            $ unzip sencha-touch-2.3.1-gpl.zip
-            $ cd touch-2.3.1
-            $ rm -rf /tmp/TempApp
-            $ sencha generate app TempApp /tmp/TempApp
-            $ cd <path/to/c2cgeoportal/project/>
-            $ cp -r /tmp/TempApp/touch c2cgp_minimal/static/mobile/
 
       - Some files can be removed from the mobile application directory since they
         are not used anymore. You can launch the following command::
@@ -624,6 +617,27 @@ Version 1.4
     and remove the related file:
 
        git rm -f c2cgp_minimal/static/mobile/resources/css/app.css
+
+  * Add new lines to your application's ``.gitignore`` file:
+
+       c2cgp_minimal/static/mobile/bootstrap.js
+       c2cgp_minimal/static/mobile/bootstrap.json
+
+    Also remove the corresponding files from your repository:
+
+        git rm -f c2cgp_minimal/static/mobile/bootstrap.js
+        git rm -f c2cgp_minimal/static/mobile/bootstrap.json
+
+  * Change the 'Home' button in Settings by a button with text. It's more
+    coherent with the application's panels:
+
+         }, {
+             xtype: 'button',
+    -        iconCls: 'home',
+    -        iconMask: true,
+    +        text: OpenLayers.i18n('close'),
+             action: 'home'
+         }]
 
 10. In the `apache/wsgi.conf.in` do the following changes:
 
@@ -1484,7 +1498,7 @@ tilecache_url: http://$${vars:host}/$${vars:parent_instanceid}/wsgi/tilecache
 3. To add the support of WMTS layers the database should be updated by
    standard procedure, CGXP also. We also need the ogcproxy, and to
    use is we need to add the following line in the file
-   <project>/templates/viewer.js:
+   c2cgp_minimal/templates/viewer.js:
 
         OpenLayers.ProxyHost = "${request.route_url('ogcproxy')}?url=";
 
@@ -1573,7 +1587,7 @@ tilecache_url: http://$${vars:host}/$${vars:parent_instanceid}/wsgi/tilecache
 9. GeoExt popup css resource in template for debug mode was missing
    - add:
      <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/lib/cgxp/geoext/resources/css/popup.css')}" />
-     in file <project>/templates/index.html
+     in file c2cgp_minimal/templates/index.html
 
 10. In the CGXP print plugin config autoFit: true should be set in the "options"
    object instead of the "outputConfig" object.
@@ -1722,7 +1736,7 @@ tilecache_url: http://$${vars:host}/$${vars:parent_instanceid}/wsgi/tilecache
 
 21. Improve the checker an add a check collector, see integator/check in the
     documentation to configure them.
-    Something like this can be removed in the <project>/__init__.py
+    Something like this can be removed in the c2cgp_minimal/__init__.py
     config.add_settings({'check_print_template': '1 A4 portrait'})
     config.add_settings({'check_FullTextSearch': 'te'})
 
@@ -2182,7 +2196,7 @@ Wed, 14 Dec 2011 17:00:24 +0100
 Implements group restriction to acces to the admin interface.
 
 To continue to acces to the admin interface you should, in the file
-'<project>/__init__.py' replaxe the line
+'c2cgp_minimal/__init__.py' replaxe the line
 -     authentication_policy = AuthTktAuthenticationPolicy(settings.get('authtkt_secret'))
 by:
 +     authentication_policy = AuthTktAuthenticationPolicy(settings.get('authtkt_secret'),
