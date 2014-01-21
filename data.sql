@@ -11822,27 +11822,27 @@ ALTER SEQUENCE treeitem_id_seq OWNED BY treeitem.id;
 
 
 --
--- Name: tsearch; Type: TABLE; Schema: main; Owner: www-data; Tablespace: 
+-- Name: tsearch; Type: TABLE; Schema: main; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE tsearch (
     id integer NOT NULL,
-    label character varying,
-    layer_name character varying,
-    role_id integer,
+    layer_name text,
+    label text,
     public boolean DEFAULT true,
+    role_id integer,
     ts tsvector,
-    params character varying,
     the_geom public.geometry,
+    params character varying,
     CONSTRAINT enforce_dims_the_geom CHECK ((public.st_ndims(the_geom) = 2)),
     CONSTRAINT enforce_srid_the_geom CHECK ((public.st_srid(the_geom) = 21781))
 );
 
 
-ALTER TABLE main.tsearch OWNER TO "www-data";
+ALTER TABLE main.tsearch OWNER TO postgres;
 
 --
--- Name: tsearch_id_seq; Type: SEQUENCE; Schema: main; Owner: www-data
+-- Name: tsearch_id_seq; Type: SEQUENCE; Schema: main; Owner: postgres
 --
 
 CREATE SEQUENCE tsearch_id_seq
@@ -11853,10 +11853,10 @@ CREATE SEQUENCE tsearch_id_seq
     CACHE 1;
 
 
-ALTER TABLE main.tsearch_id_seq OWNER TO "www-data";
+ALTER TABLE main.tsearch_id_seq OWNER TO postgres;
 
 --
--- Name: tsearch_id_seq; Type: SEQUENCE OWNED BY; Schema: main; Owner: www-data
+-- Name: tsearch_id_seq; Type: SEQUENCE OWNED BY; Schema: main; Owner: postgres
 --
 
 ALTER SEQUENCE tsearch_id_seq OWNED BY tsearch.id;
@@ -12027,7 +12027,7 @@ ALTER TABLE ONLY treeitem ALTER COLUMN id SET DEFAULT nextval('treeitem_id_seq':
 
 
 --
--- Name: id; Type: DEFAULT; Schema: main; Owner: www-data
+-- Name: id; Type: DEFAULT; Schema: main; Owner: postgres
 --
 
 ALTER TABLE ONLY tsearch ALTER COLUMN id SET DEFAULT nextval('tsearch_id_seq'::regclass);
@@ -12388,8 +12388,8 @@ SELECT pg_catalog.setval('shorturl_id_seq', 1, false);
 --
 
 COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
+4	\N	f	t
 2	\N	t	t
-4	\N	t	t
 \.
 
 
@@ -12411,7 +12411,7 @@ COPY treeitem (type, id, name, "order", "metadataURL") FROM stdin;
 theme	2	boundaries	100	\N
 layer	1	Com_Boundary	0	\N
 layer	3	buildings	0	\N
-theme	4	buildings	100	\N
+theme	4	buildings	10	\N
 \.
 
 
@@ -12423,18 +12423,28 @@ SELECT pg_catalog.setval('treeitem_id_seq', 4, true);
 
 
 --
--- Data for Name: tsearch; Type: TABLE DATA; Schema: main; Owner: www-data
+-- Data for Name: tsearch; Type: TABLE DATA; Schema: main; Owner: postgres
 --
 
-COPY tsearch (id, label, layer_name, role_id, public, ts, params, the_geom) FROM stdin;
+COPY tsearch (id, layer_name, label, public, role_id, ts, the_geom, params) FROM stdin;
+4	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000130000000000105AC45622410000801EC6C907410000505A6A5522410000401B2ECC07410000D059A85522410000401A3ED0074100006058325822410000C01C9ED4074100002058325822410000C01B46D707410000C058425622410000401836D807410000B057CE56224100000016BEE0074100009057325722410000C01676E0074100001058025722410000C0176EDC07410000B056145C2241000040220ED7074100004056385C224100000021B6DA07410000C0555E5D22410000C0227EDB0741000040555C5B22410000C01A9EE707410000C053B25C2241000080194EF107410000D053225D22410000C01A46EF074100007051146022410000001B2EFC074100002051C85E224100000016A60308410000D04F3861224100008018BE0708410000404E166322410000401846100841	\N
+5	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000100000001020000000400000000000045045622410000000080AE07410000A05C60562241000080263EB207410000405C325722410000C027A6B207410000105AC45622410000801EC6C90741	\N
+6	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000020000000000304E6662224100004016061308410000404E166322410000401846100841	\N
+7	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000100000001020000000200000000009056DE6622410000C04196B107410000A0FF216722410000000080AE0741	\N
+8	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000090000000000105AC45622410000801EC6C90741000000592A5A22410000C02496C70741000010582A5B2241000040243ECD074100001058DC5C22410000802906C7074100009056E4602241000000301EC70741000000572E612241000080328EC1074100004056BC6422410000803AEEBB0741000000575C6522410000003FA6B2074100009056DE6622410000C04196B10741	\N
+9	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000100000001020000000B0000000000004B2A6C22410000C027060F08410000504DE668224100004026560408410000D04C626A224100000029960308410000A04C326C22410000C02DDEFE07410000D04EE46922410000C02E06F207410000E04E506B22410000403376EC07410000B0509A6822410000C0313EE4074100002051B06B22410000C03CC6D407410000C053FA6722410000003BFEC807410000B0536C6922410000403FFEC3074100009056DE6622410000C04196B10741	\N
+10	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000030000000000304E6662224100004016061308410000604DBE61224100000011AE1D084100005025486522410000405B7F2B0841	\N
+11	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000030000000000004B2A6C22410000C027060F08410000F04A866C224100008028460E084100000000C06E224100004084AA080841	\N
+12	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000110000000000404E1663224100004018461008410000504EB26322410000801A060D08410000604E7A6422410000001DE6090841000030329F6422410000C0559C0908410000504ECA6422410000C01D460908410000A0DDF864224100004028650908410000105C8165224100000029C00908410000E04DBA6522410000001FE60908410000A04D326622410000801FD60A0841000040CC4F6622410000809F2F0B08410000E04C5467224100000020460E08410000404C2668224100004020661108410000D04BEE68224100000021F61208410000604BDE69224100004022461308410000404B7E6A224100008023A61208410000104B6E6B22410000C025161108410000004B2A6C22410000C027060F0841	\N
+13	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000300000001020000000400000000000085E75C224100000000802B08410000F04D4A5D224100000006E62708410000204E4E5E224100008009E62208410000304E666222410000401606130841010200000006000000000090CD1E51224100000000802B08410000B051D2532241000040F7952508410000B051EA542241000080FABD2108410000E0508E552241000080F945270841000020506A572241000040FC352808410000201A9E57224100000000802B084101020000000300000000000000804F2241000000847226084100003053904F22410000C0EFCD26084100000000804F2241000080C5F6260841	\N
 \.
 
 
 --
--- Name: tsearch_id_seq; Type: SEQUENCE SET; Schema: main; Owner: www-data
+-- Name: tsearch_id_seq; Type: SEQUENCE SET; Schema: main; Owner: postgres
 --
 
-SELECT pg_catalog.setval('tsearch_id_seq', 1, false);
+SELECT pg_catalog.setval('tsearch_id_seq', 13, true);
 
 
 --
@@ -12470,10 +12480,10 @@ SET search_path = public, pg_catalog;
 COPY geometry_columns (f_table_catalog, f_table_schema, f_table_name, f_geometry_column, coord_dimension, srid, type) FROM stdin;
 	main	restrictionarea	area	2	21781	POLYGON
 	main	role	extent	2	21781	POLYGON
-	main	tsearch	the_geom	2	21781	GEOMETRY
 	app	vec200_com_boundary	the_geom	2	21781	MULTILINESTRING
 	app	vec200_commune	the_geom	2	-1	MULTIPOLYGON
 	app	buildings	the_geom	2	21781	MULTIPOLYGON
+	main	tsearch	the_geom	2	21781	GEOMETRY
 \.
 
 
@@ -16376,7 +16386,7 @@ ALTER TABLE ONLY treeitem
 
 
 --
--- Name: tsearch_pkey; Type: CONSTRAINT; Schema: main; Owner: www-data; Tablespace: 
+-- Name: tsearch_pkey; Type: CONSTRAINT; Schema: main; Owner: postgres; Tablespace: 
 --
 
 ALTER TABLE ONLY tsearch
@@ -16450,13 +16460,6 @@ CREATE INDEX idx_role_extent ON role USING gist (extent);
 
 
 --
--- Name: idx_tsearch_the_geom; Type: INDEX; Schema: main; Owner: www-data; Tablespace: 
---
-
-CREATE INDEX idx_tsearch_the_geom ON tsearch USING gist (the_geom);
-
-
---
 -- Name: ix_main_shorturl_ref; Type: INDEX; Schema: main; Owner: www-data; Tablespace: 
 --
 
@@ -16464,7 +16467,7 @@ CREATE UNIQUE INDEX ix_main_shorturl_ref ON shorturl USING btree (ref);
 
 
 --
--- Name: tsearch_ts_idx; Type: INDEX; Schema: main; Owner: www-data; Tablespace: 
+-- Name: tsearch_ts_idx; Type: INDEX; Schema: main; Owner: postgres; Tablespace: 
 --
 
 CREATE INDEX tsearch_ts_idx ON tsearch USING gin (ts);
@@ -16567,7 +16570,7 @@ ALTER TABLE ONLY treegroup
 
 
 --
--- Name: tsearch_role_id_fkey; Type: FK CONSTRAINT; Schema: main; Owner: www-data
+-- Name: tsearch_role_id_fkey; Type: FK CONSTRAINT; Schema: main; Owner: postgres
 --
 
 ALTER TABLE ONLY tsearch
@@ -16648,6 +16651,18 @@ REVOKE ALL ON TABLE vec200_com_boundary FROM PUBLIC;
 REVOKE ALL ON TABLE vec200_com_boundary FROM postgres;
 GRANT ALL ON TABLE vec200_com_boundary TO postgres;
 GRANT SELECT ON TABLE vec200_com_boundary TO "www-data";
+
+
+SET search_path = main, pg_catalog;
+
+--
+-- Name: tsearch; Type: ACL; Schema: main; Owner: postgres
+--
+
+REVOKE ALL ON TABLE tsearch FROM PUBLIC;
+REVOKE ALL ON TABLE tsearch FROM postgres;
+GRANT ALL ON TABLE tsearch TO postgres;
+GRANT SELECT ON TABLE tsearch TO "www-data";
 
 
 SET search_path = public, pg_catalog;
