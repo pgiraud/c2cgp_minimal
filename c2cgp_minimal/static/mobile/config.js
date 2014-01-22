@@ -11,6 +11,8 @@ OpenLayers.Lang.setCode("${lang}");
 
 // App.info includes information that is needed by internal
 // components, such as the Login view component.
+App.raster = true;
+
 App.info = '${info | n}';
 
 App.themes = '${themes | n}';
