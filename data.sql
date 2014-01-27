@@ -12290,7 +12290,7 @@ SELECT pg_catalog.setval('functionality_id_seq', 1, false);
 
 COPY layer (id, public, "inMobileViewer", "inDesktopViewer", "isChecked", icon, "layerType", url, "imageType", style, dimensions, "matrixSet", "wmsUrl", "wmsLayers", "queryLayers", kml, "isSingleTile", legend, "legendImage", "legendRule", "isLegendExpanded", "minResolution", "maxResolution", disclaimer, "identifierAttributeField", "geoTable", "timeMode") FROM stdin;
 1	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	\N	disabled
-3	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	\N	disabled
+3	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	app.buildings	disabled
 \.
 
 
@@ -12307,6 +12307,7 @@ COPY layer_restrictionarea (layer_id, restrictionarea_id) FROM stdin;
 --
 
 COPY layergroup (id, "isExpanded", "isInternalWMS", "isBaseLayer") FROM stdin;
+6	t	t	f
 \.
 
 
@@ -12318,6 +12319,8 @@ COPY layergroup_treeitem (treegroup_id, treeitem_id) FROM stdin;
 2	1
 4	3
 4	1
+6	3
+5	6
 \.
 
 
@@ -12390,6 +12393,7 @@ SELECT pg_catalog.setval('shorturl_id_seq', 1, false);
 COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
 4	\N	f	t
 2	\N	t	t
+5	\N	f	t
 \.
 
 
@@ -12400,6 +12404,8 @@ COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
 COPY treegroup (id) FROM stdin;
 2
 4
+5
+6
 \.
 
 
@@ -12412,6 +12418,8 @@ theme	2	boundaries	100	\N
 layer	1	Com_Boundary	0	\N
 layer	3	buildings	0	\N
 theme	4	buildings	10	\N
+theme	5	edit	100	\N
+group	6	edit	100	\N
 \.
 
 
@@ -12419,7 +12427,7 @@ theme	4	buildings	10	\N
 -- Name: treeitem_id_seq; Type: SEQUENCE SET; Schema: main; Owner: www-data
 --
 
-SELECT pg_catalog.setval('treeitem_id_seq', 4, true);
+SELECT pg_catalog.setval('treeitem_id_seq', 6, true);
 
 
 --

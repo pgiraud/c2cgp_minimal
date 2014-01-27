@@ -17,7 +17,7 @@ Ext.onReady(function() {
     % if json_extent:
     var INITIAL_EXTENT = ${json_extent};
     % else:
-    var INITIAL_EXTENT = [420000, 30000, 900000, 350000];
+    var INITIAL_EXTENT = [600000.000000, 194000.000000, 604000.000000, 198000.000000];
     % endif
     var RESTRICTED_EXTENT = [420000, 30000, 900000, 350000];
 
@@ -32,24 +32,19 @@ Ext.onReady(function() {
     // Server errors (if any)
     var serverError = ${serverError | n};
 
-    var WMTS_OPTIONS = {
-        url: ${tiles_url | n},
-        displayInLayerSwitcher: false,
-        requestEncoding: 'REST',
-        buffer: 0,
-        transitionEffect: "resize",
-        visibility: false,
+    var wmtsLayerOptions = {
+        url: [
+            'http://tile1-sitn.ne.ch/mapproxy/wmts',
+            'http://tile2-sitn.ne.ch/mapproxy/wmts',
+            'http://tile3-sitn.ne.ch/mapproxy/wmts',
+            'http://tile4-sitn.ne.ch/mapproxy/wmts',
+            'http://tile5-sitn.ne.ch/mapproxy/wmts'
+        ],
+        matrixSet: 'swiss_grid_new',
         style: 'default',
-        dimensions: ['TIME'],
-        params: {
-            'time': '2014'
-        },
-        matrixSet: 'swissgrid',
-        maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 350000),
-        projection: new OpenLayers.Projection("EPSG:21781"),
-        units: "m",
-        formatSuffix: 'png',
-        serverResolutions: [1000,500,250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.1,0.05]
+        requestEncoding: 'REST',
+        maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 360000),
+        transitionEffect: 'resize'
     };
 
     app = new gxp.Viewer({
@@ -113,6 +108,12 @@ Ext.onReady(function() {
             defaultBaseLayerRef: "${functionality['default_basemap'][0] | n}"
         }],
 
+        sources: {
+            "olsource": {
+                ptype: "gxp_olsource"
+            }
+        },
+
         // map and layers
         map: {
             id: "app-map", // id needed to reference map in portalConfig above
@@ -141,35 +142,12 @@ Ext.onReady(function() {
                 source: "olsource",
                 type: "OpenLayers.Layer.WMTS",
                 args: [Ext.applyIf({
-                    name: OpenLayers.i18n('ortho'),
-                    mapserverLayers: 'ortho',
-                    ref: 'ortho',
-                    layer: 'ortho',
-                    formatSuffix: 'jpeg',
+                    name: OpenLayers.i18n('OpenStreetMap'),
+                    ref: 'osm',
+                    layer: 'osm',
+                    formatSuffix: 'png',
                     opacity: 0
-                }, WMTS_OPTIONS)]
-            },
-            {
-                source: "olsource",
-                type: "OpenLayers.Layer.WMTS",
-                group: 'background',
-                args: [Ext.applyIf({
-                    name: OpenLayers.i18n('plan'),
-                    mapserverLayers: 'plan',
-                    ref: 'plan',
-                    layer: 'plan',
-                    group: 'background'
-                }, WMTS_OPTIONS)]
-            },
-            {
-                source: "olsource",
-                type: "OpenLayers.Layer",
-                group: 'background',
-                args: [OpenLayers.i18n('blank'), {
-                    displayInLayerSwitcher: false,
-                    ref: 'blank',
-                    group: 'background'
-                }]
+                }, wmtsLayerOptions)]
             }],
             items: []
         }
