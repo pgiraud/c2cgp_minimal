@@ -81,6 +81,9 @@ external_mapserv_url:
 # The "raster web services" configuration. See the "raster"
 # chapter in the integrator documentation.
 raster:
+  dhm:
+    file: /home/pierre/c2cgp_minimal/data/dhm_1.shp
+    round: 1
 
 # URL to internal MapServer instance
 mapserv_url: http://localhost/${vars:instanceid}/mapserv
