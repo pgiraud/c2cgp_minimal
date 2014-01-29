@@ -216,11 +216,89 @@ MAP
         PROJECTION
           "init=epsg:21781"
         END
+        LABELITEM "objectid"
+        CLASS
+            NAME "buildings null"
+            EXPRESSION ('[objorig_ye]' eq '')
+            STYLE
+                COLOR 255 0 0
+                OUTLINECOLOR 0 0 0
+            END
+            LABEL
+                COLOR  150 150 150
+                OUTLINECOLOR 255 255 255
+                FONT "arial"
+                TYPE truetype
+                SIZE 6
+                POSITION AUTO
+                PARTIALS FALSE
+            END
+        END
+        CLASS
+            NAME "buildings < 1990"
+            EXPRESSION ([objorig_ye] < 1990)
+            STYLE
+                COLOR 0 120 120
+                OUTLINECOLOR 0 0 0
+            END
+            LABEL
+                COLOR  150 150 150
+                OUTLINECOLOR 255 255 255
+                FONT "arial"
+                TYPE truetype
+                SIZE 6
+                POSITION AUTO
+                PARTIALS FALSE
+            END
+        END
+        CLASS
+            NAME "buildings < 2000"
+            EXPRESSION ([objorig_ye] < 2000)
+            STYLE
+                COLOR 120 0 120
+                OUTLINECOLOR 0 0 0
+            END
+            LABEL
+                COLOR  150 150 150
+                OUTLINECOLOR 255 255 255
+                FONT "arial"
+                TYPE truetype
+                SIZE 6
+                POSITION AUTO
+                PARTIALS FALSE
+            END
+        END
+        CLASS
+            NAME "buildings < 2010"
+            EXPRESSION ([objorig_ye] < 2010)
+            STYLE
+                COLOR 0 0 120
+                OUTLINECOLOR 0 0 0
+            END
+            LABEL
+                COLOR  150 150 150
+                OUTLINECOLOR 255 255 255
+                FONT "arial"
+                TYPE truetype
+                SIZE 6
+                POSITION AUTO
+                PARTIALS FALSE
+            END
+        END
         CLASS
             NAME "buildings"
             STYLE
-                COLOR 120 120 0
+                COLOR 0 120 0
                 OUTLINECOLOR 0 0 0
+            END
+            LABEL
+                COLOR  150 150 150
+                OUTLINECOLOR 255 255 255
+                FONT "arial"
+                TYPE truetype
+                SIZE 6
+                POSITION AUTO
+                PARTIALS FALSE
             END
         END
     END
