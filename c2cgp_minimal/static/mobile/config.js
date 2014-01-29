@@ -58,7 +58,8 @@ App.map = new OpenLayers.Map({
         new OpenLayers.Layer.WMTS(OpenLayers.Util.extend({
             name: 'OpenStreetMap',
             layer: 'osm',
-            format: 'image/png',
+            ref: 'osm',
+            format: 'image/png'
         }, wmtsLayerOptions))
     ]
 });
