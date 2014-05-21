@@ -36,6 +36,7 @@ OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     'passwordLabel': 'Mot de passe',
     'loginSubmitButtonText': 'Me connecter',
     'loginCancelButtonText': 'Annuler',
+    'unauthorized': 'Identificant ou mot de passe incorrects, merci de réessayer.',
 
     // redirect to standard application
     'redirect_msg': "Vous utilisez la version pour mobile. Vous pouvez aussi" +
@@ -43,10 +44,12 @@ OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     'close': "Fermer",
 
     // measure
-    'Move the map to locate starting point': 'Deplacer la carte sur le point de départ',
+    'Move the map to locate starting point': 'Déplacer la carte sur le point de départ',
     'Set starting point': 'Définir le point de départ',
-    'Move the map to measure distance': "Deplacer la carte sur le point d'arrivée",
+    'Add new point': 'Ajouter un nouveau point',
     'Finish': 'Terminer',
+    'Move the map to next point': 'Déplacer la carte sur le point suivant',
+    'Finish or move the map to next point': 'Terminer ou déplacer la carte sur le point suivant',
 
     // query
     'No query result': 'Pas de résultats',
