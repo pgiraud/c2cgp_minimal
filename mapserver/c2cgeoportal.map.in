@@ -161,7 +161,7 @@ MAP
             "wfs_enable_request" "*"
 
             "gml_geometries" "the_geom"
-            "gml_geom_type" "polygon"
+            "gml_the_geom_type" "polygon"
 
             "wms_metadataurl_href" "http://www.example.com/bar" # For metadata URL
             "wms_metadataurl_format" "text/html" # For metadata URL
@@ -205,7 +205,7 @@ MAP
             "wfs_enable_request" "*"
 
             "gml_geometries" "the_geom"
-            "gml_geom_type" "polygon"
+            "gml_the_geom_type" "polygon"
 
             "wms_metadataurl_href" "http://www.example.com/bar" # For metadata URL
             "wms_metadataurl_format" "text/html" # For metadata URL
