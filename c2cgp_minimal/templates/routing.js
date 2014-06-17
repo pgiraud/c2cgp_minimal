@@ -38,10 +38,10 @@ Ext.onReady(function() {
         },
         matrixSet: 'swissgrid',
         maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 350000),
-        projection: new OpenLayers.Projection("EPSG:21781"),
+        projection: new OpenLayers.Projection("EPSG:3857"),
         units: "m",
         formatSuffix: 'png',
-        serverResolutions: [1000,500,250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.1,0.05],
+        serverResolutions: [1000,500,250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.1,0.05]
     };
 
     app = new gxp.Viewer({

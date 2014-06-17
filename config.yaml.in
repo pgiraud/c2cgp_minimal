@@ -43,6 +43,7 @@ admin_interface:
     - default_basemap
     - print_template
     - mapserver_substitution
+    - theme_basemap
 
 functionalities:
 # Functionalities that are accessible to anonymous
@@ -81,9 +82,6 @@ external_mapserv_url:
 # The "raster web services" configuration. See the "raster"
 # chapter in the integrator documentation.
 raster:
-  dhm:
-    file: /home/pierre/c2cgp_minimal/data/dhm_1.shp
-    round: 1
 
 # URL to internal MapServer instance
 mapserv_url: http://localhost/${vars:instanceid}/mapserv
@@ -93,6 +91,13 @@ mapserv_url: http://localhost/${vars:instanceid}/mapserv
 
 # Define whether the MapServer proxy should hide the OGC capabilities.
 hide_capabilities: false
+
+# Enable or disable the filtering of the layers using Mapserver runtime 
+# substitution variables in METADATA to hide protected layers from the 
+# GetCapabilities. 
+# Be careful as too many protected layers will cause an error because Apache has a 
+# 8190 characters hard limit for GET query length.
+use_security_metadata: false
 
 # For print proxy
 print_url: http://localhost:8080/print-c2cgeoportal-${vars:instanceid}/pdf/
@@ -153,9 +158,6 @@ check_collector:
               display: Print capabilities
             - name: checker_pdf
               display: Print PDF
-              display: API loader
-            - name: checker_apiloader
-              display: API loader
             - name: checker_api
               display: API
             - name: checker_xapi
@@ -175,3 +177,10 @@ check_collector:
           type: main
 #        - display: Child:
 #          url: http://${host}/child/wsgi
+
+wfs:
+    # Set to True so that MapserverProxy limits the number of features
+    # returned by a WFS GetFeature request:
+    enable_limit_featurecollection: True
+    # Max number of features returned by a WFS GetFeature request:
+    maxfeatures: 200

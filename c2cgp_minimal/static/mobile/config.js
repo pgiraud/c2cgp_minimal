@@ -11,39 +11,55 @@ OpenLayers.Lang.setCode("${lang}");
 
 // App.info includes information that is needed by internal
 // components, such as the Login view component.
-App.raster = true;
-
 App.info = '${info | n}';
 
 App.themes = '${themes | n}';
+App.theme = '${theme | n}';
 
 App.WFSTypes = '${wfs_types | n}';
 
-var wmtsLayerOptions = {
-    url: [
-        'http://tile1-sitn.ne.ch/mapproxy/wmts',
-        'http://tile2-sitn.ne.ch/mapproxy/wmts',
-        'http://tile3-sitn.ne.ch/mapproxy/wmts',
-        'http://tile4-sitn.ne.ch/mapproxy/wmts',
-        'http://tile5-sitn.ne.ch/mapproxy/wmts'
-    ],
-    matrixSet: 'swiss_grid_new',
-    style: 'default',
+// Query mode. Can be either 'click' or 'longpress'
+App.queryMode = 'longpress';
+
+var dummy = "<% from json import dumps %>";
+jsonFormat = new OpenLayers.Format.JSON();
+try {
+    App.tilesURL = jsonFormat.read('${dumps(request.registry.settings["tiles_url"]) | n}');
+}
+catch (e) {
+    // For the Sencha build ...
+    App.tilesURL = "";
+}
+var RESTRICTED_EXTENT = [420000, 30000, 900000, 350000];
+var WMTS_OPTIONS = {
+    url: App.tilesURL,
+    displayInLayerSwitcher: false,
     requestEncoding: 'REST',
-    maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 360000),
-    transitionEffect: 'resize'
+    buffer: 0,
+    transitionEffect: "resize",
+    visibility: false,
+    style: 'default',
+    dimensions: ['TIME'],
+    params: {
+        'time': '2014'
+    },
+    matrixSet: 'swissgrid',
+    maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 350000),
+    projection: new OpenLayers.Projection("EPSG:3857"),
+    units: "m",
+    formatSuffix: 'png',
+    serverResolutions: [1000,500,250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.1,0.05]
 };
+
 // define the map and layers
 App.map = new OpenLayers.Map({
-    fallThrough: true,
+    fallThrough: true, // required for longpress queries
     theme: null,
-    maxExtent: new OpenLayers.Bounds(600000.000000, 194000.000000, 604000.000000, 198000.000000),
-    //maxExtent: new OpenLayers.Bounds(515000, 180000, 580000, 230000),
-    projection: new OpenLayers.Projection("EPSG:21781"),
-    units: "m",
-    resolutions: [250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.125,0.0625],
-    center: new OpenLayers.LonLat(601950, 195690),
-    zoom: 4,
+    projection: 'EPSG:3857',
+    resolutions: [1000,500,250,100,50,20,10,5,2.5,1,0.5,0.25,0.1,0.05],
+    maxExtent: RESTRICTED_EXTENT,
+    restrictedExtent: RESTRICTED_EXTENT,
+
     controls: [
         new OpenLayers.Control.TouchNavigation({
             dragPanOptions: {
@@ -55,11 +71,22 @@ App.map = new OpenLayers.Map({
         new OpenLayers.Control.ScaleLine({geodesic: true})
     ],
     layers: [
-        new OpenLayers.Layer.WMTS(OpenLayers.Util.extend({
-            name: 'OpenStreetMap',
-            layer: 'osm',
-            ref: 'osm',
-            format: 'image/png'
-        }, wmtsLayerOptions))
+        new OpenLayers.Layer.WMTS(OpenLayers.Util.applyDefaults({
+            name: OpenLayers.i18n('plan'),
+            layer: 'plan',
+            ref: 'plan'
+        }, WMTS_OPTIONS)),
+        new OpenLayers.Layer.WMTS(OpenLayers.Util.applyDefaults({
+            name: OpenLayers.i18n('ortho'),
+            layer: 'ortho',
+            ref: 'ortho',
+            formatSuffix: 'jpeg'
+        }, WMTS_OPTIONS)),
+        new OpenLayers.Layer(
+            OpenLayers.i18n('blank'), {
+                isBaseLayer: true,
+                ref: 'blank'
+            }
+        )
     ]
 });

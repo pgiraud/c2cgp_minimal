@@ -4,7 +4,7 @@ Extended APIs.
 </%doc>
 
         var WMTS_OPTIONS = {
-            url: ${tiles_url | n},
+            url: '${tiles_url}',
             displayInLayerSwitcher: false,
             requestEncoding: 'REST',
             buffer: 0,
@@ -17,7 +17,7 @@ Extended APIs.
             },
             matrixSet: 'swissgrid',
             maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 350000),
-            projection: new OpenLayers.Projection("EPSG:21781"),
+            projection: new OpenLayers.Projection("EPSG:3857"),
             units: "m",
             formatSuffix: 'png',
             serverResolutions: [1000,500,250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.1,0.05]
@@ -32,7 +32,8 @@ Extended APIs.
             maxExtent: RESTRICTED_EXTENT,
             restrictedExtent: RESTRICTED_EXTENT,
             stateId: "map",
-            projection: new OpenLayers.Projection("EPSG:21781"),
+            theme: null,
+            projection: new OpenLayers.Projection("EPSG:3857"),
             units: "m",
             resolutions: [1000,500,250,100,50,20,10,5,2.5,1,0.5,0.25,0.1,0.05],
             controls: [
@@ -46,6 +47,7 @@ Extended APIs.
                     bottomOutUnits: false
                 }),
                 new OpenLayers.Control.LayerSwitcher(),
+                // Static image version
                 /*
                 new OpenLayers.Control.OverviewMap({
                     size: new OpenLayers.Size(200, 100),
@@ -58,13 +60,33 @@ Extended APIs.
                     )],
                     mapOptions: {
                         theme: null,
-                        projection: new OpenLayers.Projection("EPSG:21781"),
+                        projection: new OpenLayers.Projection("EPSG:3857"),
                         restrictedExtent: OpenLayers.Bounds.fromArray([420000, 30000, 900000, 350000]),
                         units: "m",
                         numZoomLevels: 1
                     }
+                }),*/
+                // OSM version
+                new OpenLayers.Control.OverviewMap({
+                    size: new OpenLayers.Size(200, 100),
+                    mapOptions: {
+                        theme: null
+                    },
+                    minRatio: 64,
+                    maxRatio: 64,
+                    layers: [new OpenLayers.Layer.OSM("OSM", [
+                            'http://a.tile.openstreetmap.org/${"${z}/${x}/${y}"}.png',
+                            'http://b.tile.openstreetmap.org/${"${z}/${x}/${y}"}.png',
+                            'http://c.tile.openstreetmap.org/${"${z}/${x}/${y}"}.png'
+                        ], {
+                            transitionEffect: 'resize',
+                            attribution: [
+                                "(c) <a href='http://openstreetmap.org/'>OSM</a>",
+                                "<a href='http://creativecommons.org/licenses/by-sa/2.0/'>by-sa</a>"
+                            ].join(' ')
+                        }
+                    )]
                 }),
-                */
                 new OpenLayers.Control.MousePosition({numDigits: 0})
             ],
             layers: [{

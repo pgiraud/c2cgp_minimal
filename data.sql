@@ -27,6 +27,15 @@ CREATE SCHEMA main;
 ALTER SCHEMA main OWNER TO postgres;
 
 --
+-- Name: main_static; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA main_static;
+
+
+ALTER SCHEMA main_static OWNER TO postgres;
+
+--
 -- Name: maine; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -11574,6 +11583,7 @@ CREATE TABLE layer (
     disclaimer character varying,
     "identifierAttributeField" character varying,
     "geoTable" character varying,
+    "excludeProperties" character varying,
     "timeMode" character varying(8) NOT NULL,
     CONSTRAINT "layer_imageType_check" CHECK ((("imageType")::text = ANY ((ARRAY['image/jpeg'::character varying, 'image/png'::character varying])::text[]))),
     CONSTRAINT "layer_layerType_check" CHECK ((("layerType")::text = ANY ((ARRAY['internal WMS'::character varying, 'external WMS'::character varying, 'WMTS'::character varying, 'no 2D'::character varying])::text[]))),
@@ -11633,7 +11643,7 @@ CREATE TABLE restrictionarea (
     area public.geometry,
     CONSTRAINT enforce_dims_area CHECK ((public.st_ndims(area) = 2)),
     CONSTRAINT enforce_geotype_area CHECK (((public.geometrytype(area) = 'POLYGON'::text) OR (area IS NULL))),
-    CONSTRAINT enforce_srid_area CHECK ((public.st_srid(area) = 21781))
+    CONSTRAINT enforce_srid_area CHECK ((public.st_srid(area) = 3857))
 );
 
 
@@ -11671,7 +11681,7 @@ CREATE TABLE role (
     extent public.geometry,
     CONSTRAINT enforce_dims_extent CHECK ((public.st_ndims(extent) = 2)),
     CONSTRAINT enforce_geotype_extent CHECK (((public.geometrytype(extent) = 'POLYGON'::text) OR (extent IS NULL))),
-    CONSTRAINT enforce_srid_extent CHECK ((public.st_srid(extent) = 21781))
+    CONSTRAINT enforce_srid_extent CHECK ((public.st_srid(extent) = 3857))
 );
 
 
@@ -11775,6 +11785,18 @@ CREATE TABLE theme (
 ALTER TABLE main.theme OWNER TO "www-data";
 
 --
+-- Name: theme_functionality; Type: TABLE; Schema: main; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE theme_functionality (
+    theme_id integer NOT NULL,
+    functionality_id integer NOT NULL
+);
+
+
+ALTER TABLE main.theme_functionality OWNER TO "www-data";
+
+--
 -- Name: treegroup; Type: TABLE; Schema: main; Owner: www-data; Tablespace: 
 --
 
@@ -11827,15 +11849,15 @@ ALTER SEQUENCE treeitem_id_seq OWNED BY treeitem.id;
 
 CREATE TABLE tsearch (
     id integer NOT NULL,
-    layer_name text,
-    label text,
-    public boolean DEFAULT true,
+    label character varying,
+    layer_name character varying,
     role_id integer,
+    public boolean DEFAULT true,
     ts tsvector,
-    the_geom public.geometry,
     params character varying,
+    the_geom public.geometry,
     CONSTRAINT enforce_dims_the_geom CHECK ((public.st_ndims(the_geom) = 2)),
-    CONSTRAINT enforce_srid_the_geom CHECK ((public.st_srid(the_geom) = 21781))
+    CONSTRAINT enforce_srid_the_geom CHECK ((public.st_srid(the_geom) = 3857))
 );
 
 
@@ -11910,6 +11932,46 @@ ALTER TABLE main.user_id_seq OWNER TO "www-data";
 --
 
 ALTER SEQUENCE user_id_seq OWNED BY "user".id;
+
+
+SET search_path = main_static, pg_catalog;
+
+--
+-- Name: shorturl; Type: TABLE; Schema: main_static; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE shorturl (
+    id integer NOT NULL,
+    url character varying(1000),
+    ref character varying(20) NOT NULL,
+    creator_email character varying(200),
+    creation timestamp without time zone,
+    last_hit timestamp without time zone,
+    nb_hits integer
+);
+
+
+ALTER TABLE main_static.shorturl OWNER TO "www-data";
+
+--
+-- Name: shorturl_id_seq; Type: SEQUENCE; Schema: main_static; Owner: www-data
+--
+
+CREATE SEQUENCE shorturl_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE main_static.shorturl_id_seq OWNER TO "www-data";
+
+--
+-- Name: shorturl_id_seq; Type: SEQUENCE OWNED BY; Schema: main_static; Owner: www-data
+--
+
+ALTER SEQUENCE shorturl_id_seq OWNED BY shorturl.id;
 
 
 SET search_path = public, pg_catalog;
@@ -12038,6 +12100,15 @@ ALTER TABLE ONLY tsearch ALTER COLUMN id SET DEFAULT nextval('tsearch_id_seq'::r
 --
 
 ALTER TABLE ONLY "user" ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);
+
+
+SET search_path = main_static, pg_catalog;
+
+--
+-- Name: id; Type: DEFAULT; Schema: main_static; Owner: www-data
+--
+
+ALTER TABLE ONLY shorturl ALTER COLUMN id SET DEFAULT nextval('shorturl_id_seq'::regclass);
 
 
 SET search_path = app, pg_catalog;
@@ -12274,6 +12345,7 @@ SET search_path = main, pg_catalog;
 --
 
 COPY functionality (id, name, value, description) FROM stdin;
+1	theme_basemap	mapquest	\N
 \.
 
 
@@ -12281,16 +12353,16 @@ COPY functionality (id, name, value, description) FROM stdin;
 -- Name: functionality_id_seq; Type: SEQUENCE SET; Schema: main; Owner: www-data
 --
 
-SELECT pg_catalog.setval('functionality_id_seq', 1, false);
+SELECT pg_catalog.setval('functionality_id_seq', 1, true);
 
 
 --
 -- Data for Name: layer; Type: TABLE DATA; Schema: main; Owner: www-data
 --
 
-COPY layer (id, public, "inMobileViewer", "inDesktopViewer", "isChecked", icon, "layerType", url, "imageType", style, dimensions, "matrixSet", "wmsUrl", "wmsLayers", "queryLayers", kml, "isSingleTile", legend, "legendImage", "legendRule", "isLegendExpanded", "minResolution", "maxResolution", disclaimer, "identifierAttributeField", "geoTable", "timeMode") FROM stdin;
-1	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	\N	disabled
-3	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	app.buildings	disabled
+COPY layer (id, public, "inMobileViewer", "inDesktopViewer", "isChecked", icon, "layerType", url, "imageType", style, dimensions, "matrixSet", "wmsUrl", "wmsLayers", "queryLayers", kml, "isSingleTile", legend, "legendImage", "legendRule", "isLegendExpanded", "minResolution", "maxResolution", disclaimer, "identifierAttributeField", "geoTable", "excludeProperties", "timeMode") FROM stdin;
+1	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	\N	\N	disabled
+3	t	t	t	t	\N	internal WMS	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	t	\N	\N	f	\N	\N	\N	\N	app.buildings	\N	disabled
 \.
 
 
@@ -12309,7 +12381,6 @@ COPY layer_restrictionarea (layer_id, restrictionarea_id) FROM stdin;
 --
 
 COPY layergroup (id, "isExpanded", "isInternalWMS", "isBaseLayer") FROM stdin;
-6	t	t	f
 \.
 
 
@@ -12318,11 +12389,7 @@ COPY layergroup (id, "isExpanded", "isInternalWMS", "isBaseLayer") FROM stdin;
 --
 
 COPY layergroup_treeitem (treegroup_id, treeitem_id) FROM stdin;
-2	1
-4	3
-4	1
-6	3
-5	6
+9	3
 \.
 
 
@@ -12331,7 +12398,7 @@ COPY layergroup_treeitem (treegroup_id, treeitem_id) FROM stdin;
 --
 
 COPY restrictionarea (id, name, description, readwrite, area) FROM stdin;
-1	aire totale	\N	t	0103000020155500000100000005000000D71A85432E511C41D15405C056E80D416862BB8548EB2341ACCFD1405E420F4124A54F5A5554244183816642D58AFE40C28EE2E502B51B41E16A89D7E729FE40D71A85432E511C41D15405C056E80D41
+1	aire totale	\N	f	0103000020110F000001000000080000007BE210E24D662441DB0624BB542B56413CAF67D8307E24412184B6834165564145868F61FD1C2841C1B4DE0927A5564199EC23C21C202C4152A0AA0FD2965641C57101546B302D41AD8EF798B43056416786097027722A4106A8DF69E7065641BF67A0430BEE2541218CC4450E1156417BE210E24D662441DB0624BB542B5641
 \.
 
 
@@ -12347,7 +12414,7 @@ SELECT pg_catalog.setval('restrictionarea_id_seq', 1, true);
 --
 
 COPY role (id, name, description, extent) FROM stdin;
-1	role_admin	\N	010300002015550000010000000500000014A852B7B0571941106CE7647A6FE6402E996B0009C11941F7698166276F1041C0A62F8AA1B52541B92CD0838C5510414BEC526E8CD6254124E4AF52D99AE54014A852B7B0571941106CE7647A6FE640
+1	role_admin		\N
 \.
 
 
@@ -12395,9 +12462,16 @@ SELECT pg_catalog.setval('shorturl_id_seq', 1, false);
 --
 
 COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
-2	\N	t	t
-5	\N	f	t
-4	\N	t	t
+9	\N	f	t
+\.
+
+
+--
+-- Data for Name: theme_functionality; Type: TABLE DATA; Schema: main; Owner: www-data
+--
+
+COPY theme_functionality (theme_id, functionality_id) FROM stdin;
+9	1
 \.
 
 
@@ -12406,10 +12480,13 @@ COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
 --
 
 COPY treegroup (id) FROM stdin;
+9
 2
 4
 5
 6
+7
+8
 \.
 
 
@@ -12424,6 +12501,9 @@ layer	3	buildings	0	\N
 theme	4	buildings	10	\N
 theme	5	edit	100	\N
 group	6	edit	100	\N
+theme	7	buildings	100	\N
+theme	8	boundaries	100	\N
+theme	9	buildings	100	\N
 \.
 
 
@@ -12431,24 +12511,14 @@ group	6	edit	100	\N
 -- Name: treeitem_id_seq; Type: SEQUENCE SET; Schema: main; Owner: www-data
 --
 
-SELECT pg_catalog.setval('treeitem_id_seq', 6, true);
+SELECT pg_catalog.setval('treeitem_id_seq', 8, true);
 
 
 --
 -- Data for Name: tsearch; Type: TABLE DATA; Schema: main; Owner: postgres
 --
 
-COPY tsearch (id, layer_name, label, public, role_id, ts, the_geom, params) FROM stdin;
-4	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000130000000000105AC45622410000801EC6C907410000505A6A5522410000401B2ECC07410000D059A85522410000401A3ED0074100006058325822410000C01C9ED4074100002058325822410000C01B46D707410000C058425622410000401836D807410000B057CE56224100000016BEE0074100009057325722410000C01676E0074100001058025722410000C0176EDC07410000B056145C2241000040220ED7074100004056385C224100000021B6DA07410000C0555E5D22410000C0227EDB0741000040555C5B22410000C01A9EE707410000C053B25C2241000080194EF107410000D053225D22410000C01A46EF074100007051146022410000001B2EFC074100002051C85E224100000016A60308410000D04F3861224100008018BE0708410000404E166322410000401846100841	\N
-5	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000100000001020000000400000000000045045622410000000080AE07410000A05C60562241000080263EB207410000405C325722410000C027A6B207410000105AC45622410000801EC6C90741	\N
-6	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000020000000000304E6662224100004016061308410000404E166322410000401846100841	\N
-7	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000100000001020000000200000000009056DE6622410000C04196B107410000A0FF216722410000000080AE0741	\N
-8	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000090000000000105AC45622410000801EC6C90741000000592A5A22410000C02496C70741000010582A5B2241000040243ECD074100001058DC5C22410000802906C7074100009056E4602241000000301EC70741000000572E612241000080328EC1074100004056BC6422410000803AEEBB0741000000575C6522410000003FA6B2074100009056DE6622410000C04196B10741	\N
-9	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000100000001020000000B0000000000004B2A6C22410000C027060F08410000504DE668224100004026560408410000D04C626A224100000029960308410000A04C326C22410000C02DDEFE07410000D04EE46922410000C02E06F207410000E04E506B22410000403376EC07410000B0509A6822410000C0313EE4074100002051B06B22410000C03CC6D407410000C053FA6722410000003BFEC807410000B0536C6922410000403FFEC3074100009056DE6622410000C04196B10741	\N
-10	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000030000000000304E6662224100004016061308410000604DBE61224100000011AE1D084100005025486522410000405B7F2B0841	\N
-11	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000030000000000004B2A6C22410000C027060F08410000F04A866C224100008028460E084100000000C06E224100004084AA080841	\N
-12	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	010500002015550000010000000102000000110000000000404E1663224100004018461008410000504EB26322410000801A060D08410000604E7A6422410000001DE6090841000030329F6422410000C0559C0908410000504ECA6422410000C01D460908410000A0DDF864224100004028650908410000105C8165224100000029C00908410000E04DBA6522410000001FE60908410000A04D326622410000801FD60A0841000040CC4F6622410000809F2F0B08410000E04C5467224100000020460E08410000404C2668224100004020661108410000D04BEE68224100000021F61208410000604BDE69224100004022461308410000404B7E6A224100008023A61208410000104B6E6B22410000C025161108410000004B2A6C22410000C027060F0841	\N
-13	com_boundary	Gemeindegrenze	t	\N	'gemeindegrenz':1	0105000020155500000300000001020000000400000000000085E75C224100000000802B08410000F04D4A5D224100000006E62708410000204E4E5E224100008009E62208410000304E666222410000401606130841010200000006000000000090CD1E51224100000000802B08410000B051D2532241000040F7952508410000B051EA542241000080FABD2108410000E0508E552241000080F945270841000020506A572241000040FC352808410000201A9E57224100000000802B084101020000000300000000000000804F2241000000847226084100003053904F22410000C0EFCD26084100000000804F2241000080C5F6260841	\N
+COPY tsearch (id, label, layer_name, role_id, public, ts, params, the_geom) FROM stdin;
 \.
 
 
@@ -12464,7 +12534,7 @@ SELECT pg_catalog.setval('tsearch_id_seq', 13, true);
 --
 
 COPY "user" (type, id, username, password, email, is_password_changed, role_id) FROM stdin;
-user	1	admin	d033e22ae348aeb5660fc2140aec35850c4da997		t	1
+user	1	admin	d033e22ae348aeb5660fc2140aec35850c4da997		f	1
 \.
 
 
@@ -12483,6 +12553,23 @@ COPY user_functionality (user_id, functionality_id) FROM stdin;
 SELECT pg_catalog.setval('user_id_seq', 1, true);
 
 
+SET search_path = main_static, pg_catalog;
+
+--
+-- Data for Name: shorturl; Type: TABLE DATA; Schema: main_static; Owner: www-data
+--
+
+COPY shorturl (id, url, ref, creator_email, creation, last_hit, nb_hits) FROM stdin;
+\.
+
+
+--
+-- Name: shorturl_id_seq; Type: SEQUENCE SET; Schema: main_static; Owner: www-data
+--
+
+SELECT pg_catalog.setval('shorturl_id_seq', 1, false);
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -12490,12 +12577,9 @@ SET search_path = public, pg_catalog;
 --
 
 COPY geometry_columns (f_table_catalog, f_table_schema, f_table_name, f_geometry_column, coord_dimension, srid, type) FROM stdin;
-	main	restrictionarea	area	2	21781	POLYGON
-	main	role	extent	2	21781	POLYGON
-	app	vec200_com_boundary	the_geom	2	21781	MULTILINESTRING
-	app	vec200_commune	the_geom	2	-1	MULTIPOLYGON
-	app	buildings	the_geom	2	21781	MULTIPOLYGON
-	main	tsearch	the_geom	2	21781	GEOMETRY
+	main	restrictionarea	area	2	3857	POLYGON
+	main	role	extent	2	3857	POLYGON
+	main	tsearch	the_geom	2	3857	GEOMETRY
 \.
 
 
@@ -16261,7 +16345,7 @@ COPY spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
 --
 
 COPY version_c2cgp_minimal (repository_id, repository_path, version) FROM stdin;
-c2cgeoportal	/home/pierre/c2cgp_minimal/c2cgp_minimal/CONST_migration	15
+c2cgeoportal	/home/pierre/c2cgp_minimal/c2cgp_minimal/CONST_migration	18
 \.
 
 
@@ -16374,6 +16458,14 @@ ALTER TABLE ONLY shorturl
 
 
 --
+-- Name: theme_functionality_pkey; Type: CONSTRAINT; Schema: main; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY theme_functionality
+    ADD CONSTRAINT theme_functionality_pkey PRIMARY KEY (theme_id, functionality_id);
+
+
+--
 -- Name: theme_pkey; Type: CONSTRAINT; Schema: main; Owner: www-data; Tablespace: 
 --
 
@@ -16429,6 +16521,16 @@ ALTER TABLE ONLY "user"
     ADD CONSTRAINT user_username_key UNIQUE (username);
 
 
+SET search_path = main_static, pg_catalog;
+
+--
+-- Name: shorturl_pkey; Type: CONSTRAINT; Schema: main_static; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY shorturl
+    ADD CONSTRAINT shorturl_pkey PRIMARY KEY (id);
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -16472,6 +16574,13 @@ CREATE INDEX idx_role_extent ON role USING gist (extent);
 
 
 --
+-- Name: idx_tsearch_the_geom; Type: INDEX; Schema: main; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX idx_tsearch_the_geom ON tsearch USING gist (the_geom);
+
+
+--
 -- Name: ix_main_shorturl_ref; Type: INDEX; Schema: main; Owner: www-data; Tablespace: 
 --
 
@@ -16484,6 +16593,17 @@ CREATE UNIQUE INDEX ix_main_shorturl_ref ON shorturl USING btree (ref);
 
 CREATE INDEX tsearch_ts_idx ON tsearch USING gin (ts);
 
+
+SET search_path = main_static, pg_catalog;
+
+--
+-- Name: ix_main_static_shorturl_ref; Type: INDEX; Schema: main_static; Owner: www-data; Tablespace: 
+--
+
+CREATE UNIQUE INDEX ix_main_static_shorturl_ref ON shorturl USING btree (ref);
+
+
+SET search_path = main, pg_catalog;
 
 --
 -- Name: layer_id_fkey; Type: FK CONSTRAINT; Schema: main; Owner: www-data
@@ -16566,6 +16686,22 @@ ALTER TABLE ONLY role_restrictionarea
 
 
 --
+-- Name: theme_functionality_functionality_id_fkey; Type: FK CONSTRAINT; Schema: main; Owner: www-data
+--
+
+ALTER TABLE ONLY theme_functionality
+    ADD CONSTRAINT theme_functionality_functionality_id_fkey FOREIGN KEY (functionality_id) REFERENCES functionality(id);
+
+
+--
+-- Name: theme_functionality_theme_id_fkey; Type: FK CONSTRAINT; Schema: main; Owner: www-data
+--
+
+ALTER TABLE ONLY theme_functionality
+    ADD CONSTRAINT theme_functionality_theme_id_fkey FOREIGN KEY (theme_id) REFERENCES theme(id);
+
+
+--
 -- Name: theme_id_fkey; Type: FK CONSTRAINT; Schema: main; Owner: www-data
 --
 
@@ -16634,6 +16770,16 @@ GRANT ALL ON SCHEMA main TO "www-data";
 
 
 --
+-- Name: main_static; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA main_static FROM PUBLIC;
+REVOKE ALL ON SCHEMA main_static FROM postgres;
+GRANT ALL ON SCHEMA main_static TO postgres;
+GRANT ALL ON SCHEMA main_static TO "www-data";
+
+
+--
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
 
@@ -16696,6 +16842,7 @@ SET search_path = public, pg_catalog;
 REVOKE ALL ON TABLE geometry_columns FROM PUBLIC;
 REVOKE ALL ON TABLE geometry_columns FROM postgres;
 GRANT ALL ON TABLE geometry_columns TO postgres;
+GRANT SELECT ON TABLE geometry_columns TO "www-data";
 GRANT ALL ON TABLE geometry_columns TO PUBLIC;
 
 
@@ -16706,6 +16853,7 @@ GRANT ALL ON TABLE geometry_columns TO PUBLIC;
 REVOKE ALL ON TABLE spatial_ref_sys FROM PUBLIC;
 REVOKE ALL ON TABLE spatial_ref_sys FROM postgres;
 GRANT ALL ON TABLE spatial_ref_sys TO postgres;
+GRANT SELECT ON TABLE spatial_ref_sys TO "www-data";
 GRANT SELECT ON TABLE spatial_ref_sys TO PUBLIC;
 
 

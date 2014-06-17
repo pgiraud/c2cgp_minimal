@@ -17,9 +17,8 @@ Ext.onReady(function() {
     % if json_extent:
     var INITIAL_EXTENT = ${json_extent};
     % else:
-    var INITIAL_EXTENT = [600000.000000, 194000.000000, 604000.000000, 198000.000000];
+    var INITIAL_EXTENT = [826580.443521,5925343.518089,836240.172969,5931152.732238];
     % endif
-    var RESTRICTED_EXTENT = [420000, 30000, 900000, 350000];
 
     // Themes definitions
     var THEMES = {
@@ -34,26 +33,6 @@ Ext.onReady(function() {
 
     // Used to transmit event throw the application
     var EVENTS = new Ext.util.Observable();
-
-    var WMTS_OPTIONS = {
-        url: ${tiles_url | n},
-        displayInLayerSwitcher: false,
-        requestEncoding: 'REST',
-        buffer: 0,
-        transitionEffect: "resize",
-        visibility: false,
-        style: 'default',
-        dimensions: ['TIME'],
-        params: {
-            'time': '2014'
-        },
-        matrixSet: 'swissgrid',
-        maxExtent: new OpenLayers.Bounds(420000, 30000, 900000, 350000),
-        projection: new OpenLayers.Projection("EPSG:21781"),
-        units: "m",
-        formatSuffix: 'png',
-        serverResolutions: [1000,500,250,100,50,20,10,5,2.5,2,1.5,1,0.5,0.25,0.1,0.05]
-    };
 
     app = new gxp.Viewer({
         portalConfig: {
@@ -149,7 +128,7 @@ Ext.onReady(function() {
             // don't work with actual version of mapserver, the proxy will limit to 200
             // it is intended to be reactivated this once mapserver is fixed
             //maxFeatures: 200,
-            srsName: 'EPSG:21781',
+            srsName: 'EPSG:3857',
             featureTypes: ["query_layer"],
             attributeURLs: ${queryer_attribute_urls | n}
         },
@@ -285,12 +264,11 @@ Ext.onReady(function() {
             id: "app-map", // id needed to reference map in portalConfig above
             xtype: 'cgxp_mappanel',
             extent: INITIAL_EXTENT,
-            maxExtent: RESTRICTED_EXTENT,
-            restrictedExtent: RESTRICTED_EXTENT,
+            maxExtent: [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
             stateId: "map",
-            projection: new OpenLayers.Projection("EPSG:21781"),
+            projection: new OpenLayers.Projection("EPSG:3857"),
             units: "m",
-            resolutions: [1000,500,250,100,50,20,10,5,2.5,1,0.5,0.25,0.1,0.05],
+            resolutions: [156543.03390625,78271.516953125,39135.7584765625,19567.87923828125,9783.939619140625,4891.9698095703125,2445.9849047851562,1222.9924523925781,611.4962261962891,305.74811309814453,152.87405654907226,76.43702827453613,38.218514137268066,19.109257068634033,9.554628534317017,4.777314267158508,2.388657133579254,1.194328566789627,0.5971642833948135],
             controls: [
                 new OpenLayers.Control.Navigation(),
                 new OpenLayers.Control.KeyboardDefaults(),
@@ -316,7 +294,7 @@ Ext.onReady(function() {
                     )],
                     mapOptions: {
                         theme: null,
-                        projection: new OpenLayers.Projection("EPSG:21781"),
+                        projection: new OpenLayers.Projection("EPSG:3857"),
                         restrictedExtent: OpenLayers.Bounds.fromArray([420000, 30000, 900000, 350000]),
                         units: "m",
                         numZoomLevels: 1
@@ -345,6 +323,27 @@ Ext.onReady(function() {
                 })
             ],
             layers: [{
+                source: "olsource",
+                type: "OpenLayers.Layer.OSM",
+                group: 'background',
+                args: [
+                    OpenLayers.i18n('OSM_MapQuest'),
+                    [
+                       'http://otile1.mqcdn.com/tiles/1.0.0/osm/${"${z}/${x}/${y}"}.png',
+                       'http://otile2.mqcdn.com/tiles/1.0.0/osm/${"${z}/${x}/${y}"}.png',
+                       'http://otile3.mqcdn.com/tiles/1.0.0/osm/${"${z}/${x}/${y}"}.png'
+                    ], {
+                       projection: new OpenLayers.Projection("EPSG:3857"),
+                       transitionEffect: 'resize',
+                       attribution: [
+                           "(c) <a href='http://openstreetmap.org/'>OSM</a>",
+                           "<a href='http://creativecommons.org/licenses/by-sa/2.0/'>by-sa</a>"
+                       ].join(' '),
+                       group: 'background',
+                       ref: 'mapquest'
+                    }
+                ]
+            }, {
                 source: "olsource",
                 type: "OpenLayers.Layer",
                 group: 'background',

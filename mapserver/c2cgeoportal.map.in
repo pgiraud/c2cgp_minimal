@@ -16,7 +16,7 @@
 MAP
     NAME "geoportal"
 
-    EXTENT 600000.000000 194000.000000 604000.000000 198000.000000
+    EXTENT -466375.77628413 5379611.8001185 1035458.955194 6573252.433606
     UNITS METERS
 
     # RESOLUTION and DEFRESOLUTION default to 72. If you
@@ -59,7 +59,7 @@ MAP
     END
 
     PROJECTION
-        "init=epsg:21781"
+        "init=epsg:3857"
     END
 
     WEB
@@ -67,7 +67,7 @@ MAP
             "wms_title" "changeme"
             "wms_abstract" "changeme"
             "wms_onlineresource" "http://${vars:host}/${vars:instanceid}/wsgi/mapserv_proxy"
-            "wms_srs" "epsg:21781"
+            "wms_srs" "epsg:2857"
             "wms_encoding" "UTF-8"
             "wms_enable_request" "*"
             "wfs_enable_request" "!*"
@@ -101,7 +101,7 @@ MAP
         #DATA "geometrie FROM (SELECT geo.geom as geom FROM geodata.table AS geo) AS foo USING UNIQUE gid USING srid=21781"
         METADATA
             "wms_title" "layer_name" # For WMS
-            "wms_srs" "epsg:21781" # For WMS
+            "wms_srs" "epsg:3857" # For WMS
 
             "wfs_enable_request" "*" # Enable WFS for this layer
             "gml_include_items" "all" # For GetFeatureInfo and WFS GetFeature (QuerryBuilder)
@@ -153,7 +153,7 @@ MAP
         #DATA "geometrie FROM (SELECT geo.geom as geom FROM geodata.table AS geo) AS foo USING UNIQUE gid USING srid=21781"
         METADATA
             "wms_title" "Com_Boundary" # For WMS
-            "wms_srs" "epsg:21781" # For WMS
+            "wms_srs" "epsg:3857" # For WMS
 
             "gml_include_items" "all"
             "gml_types" "auto"
@@ -197,7 +197,7 @@ MAP
         #DATA "geometrie FROM (SELECT geo.geom as geom FROM geodata.table AS geo) AS foo USING UNIQUE gid USING srid=21781"
         METADATA
             "wms_title" "buildings" # For WMS
-            "wms_srs" "epsg:21781" # For WMS
+            "wms_srs" "epsg:3857" # For WMS
 
             "gml_include_items" "all"
             "gml_types" "auto"
