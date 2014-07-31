@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 by Camptocamp SA
+ * Copyright (c) 2011-2014 by Camptocamp SA
  *
  * CGXP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,14 @@ OpenLayers.Util.extend(OpenLayers.Lang.de, {
 
     // login/logout
     'loginButtonText': 'Log in',
-    'welcomeText': '<p>Sie sind {username}.</p>',
+    'welcomeText': '<p>Sie sind als Benutzer <em>{username}</em> eingeloggt.</p>',
     'logoutButtonText': 'Log out',
     'loginLabel': 'Login',
     'passwordLabel': 'Passwort',
     'loginSubmitButtonText': 'OK',
     'loginCancelButtonText': 'Abbrechen',
-    'unauthorized': 'Nutzername oder Passwort inkorrekt, bitte versuchen Sie es erneut.',
+    'unauthorized': 'Unbefugt',
+    'wrongUserPass': 'Nutzername oder Passwort inkorrekt, bitte versuchen Sie es erneut.',
 
     // redirect to standard application
     'redirect_msg': "Sie benutzen die mobile Version. Sie können auch" +

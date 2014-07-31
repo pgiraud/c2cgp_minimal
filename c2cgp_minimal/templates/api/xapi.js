@@ -134,11 +134,11 @@ document.write('<link rel="stylesheet" type="text/css" href="'
         + "${request.static_url('c2cgp_minimal:static/css/proj-widgets.css')}" + '" />');
 % else:
 document.write('<scr' + 'ipt type="text/javascript" src="'
-        + "${request.static_url('c2cgp_minimal:static/build/xapi.js')}" + '"></scr' + 'ipt>');
+        + "${request.static_url('c2cgp_minimal:static/build/xapi.js', _query=url_params)}" + '"></scr' + 'ipt>');
 document.write('<scr' + 'ipt type="text/javascript" src="'
-        + "${request.static_url('c2cgp_minimal:static/build/lang-%s.js' % lang)}" + '"></scr' + 'ipt>');
+        + "${request.static_url('c2cgp_minimal:static/build/lang-%s.js' % lang, _query=url_params)}" + '"></scr' + 'ipt>');
 document.write('<link rel="stylesheet" type="text/css" href="'
-        + "${request.static_url('c2cgp_minimal:static/build/xapi.css')}" + '" />');
+        + "${request.static_url('c2cgp_minimal:static/build/xapi.css', _query=url_params)}" + '" />');
 % endif
 
 c2cgp_minimal = {};

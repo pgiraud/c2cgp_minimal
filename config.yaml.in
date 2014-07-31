@@ -83,6 +83,11 @@ external_mapserv_url:
 # chapter in the integrator documentation.
 raster:
 
+# The shortner base configuration
+shortener:
+  # The base of created URL
+  base_url:  http://${vars:host}${vars:apache-entry-point}s/
+
 # URL to internal MapServer instance
 mapserv_url: http://localhost/${vars:instanceid}/mapserv
 # If the WFS service is different from the WMS service, uncomment and set the

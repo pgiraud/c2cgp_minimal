@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 by Camptocamp SA
+ * Copyright (c) 2011-2014 by Camptocamp SA
  *
  * CGXP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ Ext.define('App.controller.Query', {
             geometryName: 'geom',
             srsName: App.map.getProjection(),
             formatOptions: {
-                featureNS: 'http://mapserver.gis.umn.edu/mapserver',
+                featureNS: App.featureNS,
                 autoconfig: false
             }
         });

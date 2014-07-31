@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 by Camptocamp SA
+ * Copyright (c) 2011-2014 by Camptocamp SA
  *
  * CGXP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,13 +60,6 @@ Ext.application({
     },
 
     launch: function() {
-        // decode the information received from the server
-        if (App.info) {
-            App.info = Ext.JSON.decode(App.info, true);
-        }
-        if (App.themes) {
-            App.themes = Ext.JSON.decode(App.themes, true);
-        }
         this.getController('Main').loadTheme(App.theme);
 
         // create the main view and set the map into it

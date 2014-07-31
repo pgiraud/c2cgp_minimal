@@ -4,60 +4,32 @@ This file includes migration steps for each release of c2cgeoportal.
 Version 1.5
 ===========
 
-1. Get the new files:
+1. Update the `jsbuild/app.cfg` file.
 
-    git add versions.cfg
+    * In the language sections [lang-fr.js], [lang-de.js] add the following
+      localisation files (in `include`) respectively:
 
-    ./buildout/bin/pcreate -s c2cgeoportal_create /tmp/c2cgp_minimal package=c2cgp_minimal
+        ux/locale/StreetViewPanel-fr.js
+        ux/locale/StreetViewPanel-de.js
 
-    # Get the new files ...
+    * To make sure that custom translations always have priority, also
+      do the following changes in [lang-fr.js], [lang-de.js]:
 
-    rm -rf /tmp/c2cgp_minimal
+        + last =
+        +     Proj/Lang/<lang>.js
+        +     Proj/Lang/GeoExt-<lang>.js
+          include =
+              ...
+        -     Proj/Lang/<lang>.js
+        -     Proj/Lang/GeoExt-<lang>.js
 
-2. Remove the deprecated files:
+2. Update the `production.ini.in` and `development.ini.in` files:
 
-    git rm ...
+  * Add the new default_max_age to 10 days:
 
-3. Update the `jsbuild/app.cfg` file.
+        default_max_age = 864000
 
-  * Set all the `root` sections to:
-
-        c2cgp_minimal/static/lib/cgxp/core/src/script
-        c2cgp_minimal/static/lib/cgxp/ext
-        c2cgp_minimal/static/lib/cgxp/geoext/lib
-        c2cgp_minimal/static/lib/cgxp/openlayers/lib
-        c2cgp_minimal/static/lib/cgxp/openlayers.addins/GoogleEarthView/lib
-        c2cgp_minimal/static/lib/cgxp/openlayers.addins/Spherical/lib
-        c2cgp_minimal/static/lib/cgxp/openlayers.addins/URLCompressed/lib
-        c2cgp_minimal/static/lib/cgxp/openlayers.addins/DynamicMeasure/lib
-        c2cgp_minimal/static/lib/cgxp/openlayers.addins/AddViaPoint/lib
-        c2cgp_minimal/static/lib/cgxp/gxp/src/script
-        c2cgp_minimal/static/lib/cgxp/proj4js
-        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/Measure/lib
-        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/SimplePrint/lib
-        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureEditing/lib
-        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/FeatureSelectionModel/lib
-        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/WMSBrowser/lib
-        c2cgp_minimal/static/lib/cgxp/geoext.ux/ux/StreetViewPanel
-        c2cgp_minimal/static/lib/cgxp/sandbox
-        c2cgp_minimal/static/lib/cgxp/styler/lib
-        c2cgp_minimal/static/lib/cgxp/ext.ux/TwinTriggerComboBox
-        c2cgp_minimal/static/lib/cgxp/ext.ux/GroupComboBox
-        c2cgp_minimal/static/lib/cgxp/ext.ux/ColorPicker
-        c2cgp_minimal/static/lib/cgxp/ext.ux/base64
-        c2cgp_minimal/static/lib/cgxp/ext.overrides
-        c2cgp_minimal/static/lib/cgxp/dygraphs
-        c2cgp_minimal/static/js
-
-4. Update the `production.ini.in` and `development.ini.in` files:
-
-  * Add the new default_max_age to 10 hours:
-
-        default_max_age = 36000
-
-5. In the `buildout.cfg` file:
-
-6. In the `config.yaml.in` file:
+3. In the `config.yaml.in` file:
 
    * Update the `main` `checkers` by removing `checker_apiloader` (no longer exists),
      and adding `checker_api`, `checker_xapi`, `checker_fts`, `checker_wmscapabilities`
@@ -76,8 +48,14 @@ Version 1.5
         +  - name: checker_wfscapabilities
         +    display: WFS capabilities
 
+    * Add (or update) the following configuration
 
-7. In the `c2cgp_minimal/__init__.py` file:
+        # The shortner base configuration
+        shortener:
+          # The base of created URL
+          base_url:  http://${vars:host}${vars:apache-entry-point}s/
+
+4. In the `c2cgp_minimal/__init__.py` file:
 
    * Use a cache header in the static view:
 
@@ -86,17 +64,64 @@ Version 1.5
         +     cache_max_age=int(config.get_settings()["default_max_age"])
         + )
 
-8. Update the templates:
+5. Update the templates:
 
   * In all the `c2cgp_minimal/templates/*.js` files:
 
   * In the `c2cgp_minimal/templates/viewer.js`:
 
-9. Update the mobile application:
+    * Add a reference to the `LayerTree` plugin in the `MapOpacitySlider` config:
 
-  * In the `c2cgp_minimal/static/mobile/config.js` file:
+        {
+            ptype: "cgxp_mapopacityslider",
+      +     layerTreeId: "layertree",
+            defaultBaseLayerRef: "${functionality['default_basemap'][0] | n}"
+        }
 
-10. Do the following changes in the ``apache/frontend.conf.in`` file:
+6. Update the mobile application:
+
+    * In the `c2cgp_minimal/static/mobile/config.js` file do the following changes:
+
+        -// App.info includes information that is needed by internal
+        -// components, such as the Login view component.
+        -App.info = '${info | n}';
+        -
+        -App.themes = '${themes | n}';
+        -App.theme = '${theme | n}';
+        -
+        -App.WFSTypes = '${wfs_types | n}';
+        -
+        -// Query mode. Can be either 'click' or 'longpress'
+        -App.queryMode = 'longpress';
+        -
+         var dummy = "<% from json import dumps %>";
+         jsonFormat = new OpenLayers.Format.JSON();
+         try {
+        +    // App.info includes information that is needed by internal
+        +    // components, such as the Login view component.
+        +    App.info = jsonFormat.read('${dumps(info) | n}');
+        +
+        +    App.themes = jsonFormat.read('${dumps(themes) | n}');
+        +    App.theme = '${theme | n}';
+        +
+        +    App.WFSTypes = '${wfs_types | n}'.split(',');
+        +
+        +    // Query mode. Can be either 'click' or 'longpress'
+        +    App.queryMode = 'longpress';
+
+             App.tilesURL = jsonFormat.read('${dumps(request.registry.settings["tiles_url"]) | n}');
+         }
+         catch (e) {
+             // For the Sencha build ...
+        -    App.tilesURL = "";
+         }
+        +
+        +App.featureNS = 'http://mapserver.gis.umn.edu/mapserver';
+
+7. Do the following changes in the ``apache/frontend.conf.in`` file:
+
+  -AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/x-javascript application/javascript application/json
+  +AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/x-javascript text/javascript application/javascript application/json
 
   -<LocationMatch /${vars:instanceid}/wsgi/(app|build|lib)>
   -    # Remove etags to enable better client-side caching
@@ -113,12 +138,100 @@ Version 1.5
   +    # Instruct proxys that these files are cacheable.
   +    Header merge Cache-Control "public"
 
-11. Some important notices:
+8. Add the following line in the ``apache/wsgi.conf.in`` file:
+
+    RewriteRule ^${vars:apache-entry-point}s/(.*)$ /${vars:instanceid}/wsgi/short/$1 [PT]
+
+9. Some important notices:
 
   * If using Mapserver 6.4 you have to move the substitution variables default
     values and validation patterns from the METADATA section to a VALIDATION
     section. See ``Variable Substitution`` in the Mapfile chapter of the
     administrator manual.
+
+  * All references of tilecache will be removed.
+
+
+Version 1.4.5
+=============
+
+1. In the `c2cgp_minimal/__init__.py` replace 'testing' by 'production':
+
+         config.add_route('mobile_index_prod', '/mobile/')
+         config.add_view('c2cgeoportal.views.entry.Entry',
+                         attr='mobile',
+    -                    renderer='c2cgp_minimal:static/mobile/build/testing/App/index.html',
+    +                    renderer='c2cgp_minimal:static/mobile/build/production/App/index.html',
+                         route_name='mobile_index_prod')
+         config.add_route('mobile_config_prod', '/mobile/config.js')
+         config.add_view('c2cgeoportal.views.entry.Entry',
+                         attr='mobileconfig',
+    -                    renderer='c2cgp_minimal:static/mobile/build/testing/App/config.js',
+    +                    renderer='c2cgp_minimal:static/mobile/build/production/App/config.js',
+                         route_name='mobile_config_prod')
+    -    config.add_static_view('mobile', 'c2cgp_minimal:static/mobile/build/testing/App')
+    +    config.add_static_view('mobile', 'c2cgp_minimal:static/mobile/build/production/App')
+
+2. To add the cache version parameter to the JS/CSS URLs:
+
+   * Add to ``production.ini.in`` and ``development.ini.in`` in the ``[app:app]`` section:
+
+   cache_version = ${cache_version}
+
+   * In ``c2cgp_minimal/templates/index.html`` do the following changes:
+
+   - <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/build/app.css')}" />
+   + <link rel="stylesheet" type="text/css" href="${request.static_url('c2cgp_minimal:static/build/app.css', _query=url_params)}" />
+
+   - <script type="text/javascript" src="${request.static_url('c2cgp_minimal:static/build/app.js')}"></script>
+   - <script type="text/javascript" src="${request.static_url('c2cgp_minimal:static/build/lang-%s.js' % lang)}"></script>
+   + <script type="text/javascript" src="${request.static_url('c2cgp_minimal:static/build/app.js', _query=url_params)}"></script>
+   + <script type="text/javascript" src="${request.static_url('c2cgp_minimal:static/build/lang-%s.js' % lang, _query=url_params)}"></script>
+
+   - <script type="text/javascript" src="${request.route_url('viewer')}${extra_params}"></script>
+   + <script type="text/javascript" src="${request.route_url('viewer', _query=extra_params)}"></script>
+
+   The same changes must be done in ``c2cgp_minimal/templates/edit.html`` and ``c2cgp_minimal/templates/routing.html``.
+
+   In ``c2cgp_minimal/templates/api/api.js`` do the following changes:
+
+     document.write('<scr' + 'ipt type="text/javascript" src="'
+   -     + "${request.static_url('c2cgp_minimal:static/build/api.js')}" + '"></scr' + 'ipt>');
+   +     + "${request.static_url('c2cgp_minimal:static/build/api.js', _query=url_params)}" + '"></scr' + 'ipt>');
+     document.write('<scr' + 'ipt type="text/javascript" src="'
+   -     + "${request.static_url('c2cgp_minimal:static/build/api-lang-%s.js' % lang)}" + '"></scr' + 'ipt>');
+   +     + "${request.static_url('c2cgp_minimal:static/build/api-lang-%s.js' % lang, _query=url_params)}" + '"></scr' + 'ipt>');
+     document.write('<link rel="stylesheet" type="text/css" href="'
+   -     + "${request.static_url('c2cgp_minimal:static/build/api.css')}" + '" />');
+   +     + "${request.static_url('c2cgp_minimal:static/build/api.css', _query=url_params)}" + '" />');
+
+   Similar changes are needed in ``c2cgp_minimal/templates/api/xapi.js`` as well.
+
+11. In the `c2cgp_minimal/__init__.py` file:
+
+   * Use the multiauthpolicy:
+
+
+        from pyramid.config import Configurator
+        -from pyramid.authentication import AuthTktAuthenticationPolicy
+        from pyramid.settings import asbool
+        from c2cgeoportal import locale_negotiator
+        -from c2cgeoportal.resources import FAModels, defaultgroupsfinder
+        +from c2cgeoportal.resources import FAModels
+        +from c2cgeoportal.lib.authentication import create_authentication
+        from c2cgp_minimal.resources import Root
+
+        def main(global_config, **settings):
+            """ This function returns a Pyramid WSGI application.
+            """
+        -   authentication_policy = AuthTktAuthenticationPolicy(
+        -            settings.get('authtkt_secret'),
+        -            callback=defaultgroupsfinder,
+        -            cookie_name=settings.get('authtkt_cookie_name'))
+            config = Configurator(root_factory=Root, settings=settings,
+                     locale_negotiator=locale_negotiator,
+        -            authentication_policy=authentication_policy)
+        +            authentication_policy=create_authentication(settings))
 
 
 Version 1.4.3
