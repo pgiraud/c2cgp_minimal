@@ -105,6 +105,7 @@ Ext.onReady(function() {
         {
             ptype: "cgxp_layertree",
             id: "layertree",
+            event: EVENTS,
             outputConfig: {
                 header: false,
                 flex: 1,
@@ -175,6 +176,7 @@ Ext.onReady(function() {
         {
             ptype: "cgxp_permalink",
             id: "permalink",
+            shortenerCreateURL: "${request.route_url('shortener_create', path='')}",
             actionTarget: "center.tbar"
         },
         {
@@ -228,6 +230,7 @@ Ext.onReady(function() {
         {
             ptype: "cgxp_login",
             actionTarget: "center.tbar",
+            events: EVENTS,
             toggleGroup: "maptools",
     % if user:
             username: "${user.username}",

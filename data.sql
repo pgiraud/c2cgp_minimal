@@ -11942,7 +11942,7 @@ SET search_path = main_static, pg_catalog;
 
 CREATE TABLE shorturl (
     id integer NOT NULL,
-    url character varying(1000),
+    url character varying,
     ref character varying(20) NOT NULL,
     creator_email character varying(200),
     creation timestamp without time zone,
@@ -12346,6 +12346,7 @@ SET search_path = main, pg_catalog;
 
 COPY functionality (id, name, value, description) FROM stdin;
 1	theme_basemap	mapquest	\N
+2	theme_basemap	blank	\N
 \.
 
 
@@ -12353,7 +12354,7 @@ COPY functionality (id, name, value, description) FROM stdin;
 -- Name: functionality_id_seq; Type: SEQUENCE SET; Schema: main; Owner: www-data
 --
 
-SELECT pg_catalog.setval('functionality_id_seq', 1, true);
+SELECT pg_catalog.setval('functionality_id_seq', 2, true);
 
 
 --
@@ -12390,6 +12391,7 @@ COPY layergroup (id, "isExpanded", "isInternalWMS", "isBaseLayer") FROM stdin;
 
 COPY layergroup_treeitem (treegroup_id, treeitem_id) FROM stdin;
 9	3
+10	1
 \.
 
 
@@ -12463,6 +12465,7 @@ SELECT pg_catalog.setval('shorturl_id_seq', 1, false);
 
 COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
 9	\N	f	t
+10	\N	f	t
 \.
 
 
@@ -12472,6 +12475,7 @@ COPY theme (id, icon, "inMobileViewer", "inDesktopViewer") FROM stdin;
 
 COPY theme_functionality (theme_id, functionality_id) FROM stdin;
 9	1
+10	2
 \.
 
 
@@ -12487,6 +12491,7 @@ COPY treegroup (id) FROM stdin;
 6
 7
 8
+10
 \.
 
 
@@ -12504,6 +12509,7 @@ group	6	edit	100	\N
 theme	7	buildings	100	\N
 theme	8	boundaries	100	\N
 theme	9	buildings	100	\N
+theme	10	boundaries	100	\N
 \.
 
 
@@ -12511,7 +12517,7 @@ theme	9	buildings	100	\N
 -- Name: treeitem_id_seq; Type: SEQUENCE SET; Schema: main; Owner: www-data
 --
 
-SELECT pg_catalog.setval('treeitem_id_seq', 8, true);
+SELECT pg_catalog.setval('treeitem_id_seq', 10, true);
 
 
 --
@@ -12534,7 +12540,7 @@ SELECT pg_catalog.setval('tsearch_id_seq', 13, true);
 --
 
 COPY "user" (type, id, username, password, email, is_password_changed, role_id) FROM stdin;
-user	1	admin	d033e22ae348aeb5660fc2140aec35850c4da997		f	1
+user	1	admin	d033e22ae348aeb5660fc2140aec35850c4da997		t	1
 \.
 
 
@@ -16345,7 +16351,7 @@ COPY spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
 --
 
 COPY version_c2cgp_minimal (repository_id, repository_path, version) FROM stdin;
-c2cgeoportal	/home/pierre/c2cgp_minimal/c2cgp_minimal/CONST_migration	18
+c2cgeoportal	/home/pierre/c2cgp_minimal/c2cgp_minimal/CONST_migration	19
 \.
 
 

@@ -131,10 +131,10 @@ Ext.define('App.controller.Main', {
             var theme = App.themes[i];
             for (var j = 0, jl = theme.allLayers.length; j < jl; j++ ) {
                 var layer = theme.allLayers[j];
+                var childLayers = layer.childLayers || [];
                 this.layers[layer.name] = layer;
-                for (var k = 0, kl = layer.childLayers.length; k < kl; k++ ) {
-                    var childLayer = layer.childLayers[k];
-                    this.layers[childLayer.name] = childLayer;
+                for (var k = 0, kl = childLayers.length; k < kl; k++ ) {
+                    this.layers[childLayers[k].name] = childLayers[k];
                 }
             }
         }
@@ -287,7 +287,7 @@ Ext.define('App.controller.Main', {
 
         // currently displayed baseLayer
         if (map.baseLayer.WFSTypes) {
-            layers = layers.concat(this.toArray(map.baseLayer.WFSTypes));
+            layers = layers.concat(map.baseLayer.WFSTypes);
         }
 
         // launch query only if there are layers or raster to query
@@ -332,8 +332,10 @@ Ext.define('App.controller.Main', {
                         // layers to display at startup
                         layers: t.layers,
                         transparent: true
-                    },{
+                    }, {
                         singleTile: true,
+                        // list of available layers
+                        allLayers: t.allLayers
                     }
                 );
                 App.map.addLayer(overlay);
