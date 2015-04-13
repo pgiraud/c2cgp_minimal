@@ -63,4 +63,6 @@ def main(global_config, **settings):
                     route_name='mobile_config_prod')
     config.add_static_view('mobile', 'c2cgp_minimal:static/mobile/build/production/App')
 
+    config.add_route('file_proxy', '/file_proxy/{layer}/{file}')
+
     return config.make_wsgi_app()

@@ -189,3 +189,6 @@ wfs:
     enable_limit_featurecollection: True
     # Max number of features returned by a WFS GetFeature request:
     maxfeatures: 200
+
+file_proxy:
+    url: http://dev.camptocamp.com/files/test_pierre
